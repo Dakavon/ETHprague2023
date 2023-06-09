@@ -27,11 +27,10 @@ Lens collect carbon retirements
 
 #### Publish a publication
 - choose "retire carbon" as collection function
-- optional: choose "carbon percentage" instead
 
 #### Collect a publication
 - usual workflow
-- optional: make visible that collection will retire carbon
+
 
 ## Implementation
 - use BCTCollectRetire module on Mumbai https://mumbai.polygonscan.com/address/0x05A6841cBdc292f83b0642954C5497Cb02dED05A
@@ -41,6 +40,17 @@ Lens collect carbon retirements
 
 ## TODOs
 
+- Deploy app on localhost
+- Set SDK to testnet
+- Create 2 lens profiles on testnet or use two existing
+- Implement publish/collect functions in app
+- Implement BCTRetireCollect function in app
+- Implement carbon summary in profile view
 
 
 
+
+## Possible next steps
+
+- Set collection rule: choose "carbon percentage" instead of everything
+- Collection workflow: make visible that collection will retire carbon
