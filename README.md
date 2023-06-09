@@ -50,7 +50,7 @@ Lens collect carbon retirements
 
 
 
-## Possible next steps
+# Possible next steps
 
 - Set collection rule: choose "carbon percentage" instead of everything
 - Collection workflow: make visible that collection will retire carbon
