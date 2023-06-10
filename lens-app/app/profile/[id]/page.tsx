@@ -2,15 +2,13 @@
 'use client'
 import { usePathname } from 'next/navigation';
 // new imports
-import { useProfile, usePublications, useWalletLogin, useWalletLogout, useActiveProfile,
-  Profile,
-  AnyPublication
+import { useProfile, useWalletLogin, useWalletLogout, useActiveProfile,
 } from '@lens-protocol/react-web';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { formatPicture } from '../../../utils';
 import { Follow } from '@/app/components/Follow';
-import { Collect } from '@/app/components/Collect';
+import { Publications } from '@/app/components/Publications';
 
 export default function Profile() {
   // new hooks
@@ -82,31 +80,5 @@ export default function Profile() {
   )
 }
 
-function Publications({
-  profile
-}: {
-  profile: Profile
-}) {
-  let { data: publications } = usePublications({
-    profileId: profile.id,
-    limit: 1,
-  })
-  publications = publications?.map(publication => {
-    if (publication.__typename === 'Mirror') {
-      return publication.mirrorOf;
-    } else {
-      return publication;
-    }
-  });
 
-  return (
-    <>
-      {
-        publications?.map((pub: any, index: number) => (
-          <Collect key={pub.id} pub={pub} profile={profile}/>
-        ))
-    }
-    </>
-  )
-}
 
