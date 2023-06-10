@@ -1,8 +1,7 @@
 // new component
 
 import { formatPicture } from "@/utils";
-import { AnyPublication, Profile, ProfileOwnedByMe, useActiveProfile, useCollect } from "@lens-protocol/react-web";
-import { useChainId } from "wagmi";
+import { AnyPublication, InsufficientAllowanceError, InsufficientFundsError, Profile, ProfileOwnedByMe, useActiveProfile, useCollect } from "@lens-protocol/react-web";
 
 // TODO: Show if already following
 export function Collect({
@@ -12,13 +11,29 @@ export function Collect({
     profile: Profile
   }) {
     const { data: wallet } = useActiveProfile();
-    if(!wallet) return;
-    const { execute: collect } = useCollect({collector: wallet, publication: pub})
-    const chainId = useChainId();
-    console.log("chainId", chainId)
+    const { execute: collect, isPending: loading, error } = useCollect({collector: wallet as ProfileOwnedByMe, publication: pub});
+
+    async function handleClick() {
+      try {
+        await collect();
+      } catch (e) {
+        console.log(e);
+    }
+
+    console.log("collect", loading, error);
+
+    if (error instanceof InsufficientFundsError) {
+      alert('Insufficient funds');
+    } else if (error instanceof InsufficientAllowanceError) {
+      alert('Insufficient allowance');
+      } else {
+      alert('Something went wrong');
+    }
+  }
+
     return (
         <>
-            <div className="py-4 bg-zinc-900 rounded mb-3 px-4">
+            <div className="flex items-center justify-between py-4 bg-zinc-900 rounded mb-3 px-4">
               <p>{pub.metadata.content}</p>
               {
                 pub.metadata?.media[0]?.original && ['image/jpeg', 'image/png'].includes(pub.metadata?.media[0]?.original.mimeType) && (
@@ -31,7 +46,7 @@ export function Collect({
                   />
                 )
               }
-              <button onClick={collect}>Collect</button>
+              <button className="btn" onClick={handleClick}>Collect</button>
             </div>
       </>
     )

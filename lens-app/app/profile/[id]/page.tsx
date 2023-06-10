@@ -3,9 +3,10 @@
 import { usePathname } from 'next/navigation';
 // new imports
 import { useProfile, usePublications, useWalletLogin, useWalletLogout, useActiveProfile,
-  Profile
+  Profile,
+  AnyPublication
 } from '@lens-protocol/react-web';
-import { useAccount, useChainId, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { formatPicture } from '../../../utils';
 import { Follow } from '@/app/components/Follow';
@@ -18,8 +19,6 @@ export default function Profile() {
   const { data: wallet } = useActiveProfile();
   const { isConnected } = useAccount();
   const { disconnectAsync } = useDisconnect();
-  const chainId = useChainId();
-  console.log("chainId 2", chainId)
   
   const pathName = usePathname()
   const handle = pathName?.split('/')[2]
@@ -104,7 +103,7 @@ function Publications({
     <>
       {
         publications?.map((pub: any, index: number) => (
-          <Collect key={index} pub={pub} profile={profile}/>
+          <Collect key={pub.id} pub={pub} profile={profile}/>
         ))
     }
     </>
