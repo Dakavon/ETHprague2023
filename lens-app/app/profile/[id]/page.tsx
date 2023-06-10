@@ -9,6 +9,7 @@ import { InjectedConnector } from 'wagmi/connectors/injected';
 import { formatPicture } from '../../../utils';
 import { Follow } from '@/app/components/Follow';
 import { Publications } from '@/app/components/Publications';
+import { NewPost } from '@/app/components/NewPost';
 
 export default function Profile() {
   // new hooks
@@ -22,6 +23,8 @@ export default function Profile() {
   const handle = pathName?.split('/')[2]
 
   let { data: profile, loading } = useProfile({ handle })
+
+  console.log("profile", profile, wallet);
 
   const { connectAsync } = useConnect({
     connector: new InjectedConnector(),
@@ -42,8 +45,8 @@ export default function Profile() {
   if (loading) return <p className="p-14">Loading ...</p>
 
   return (
-    <div>
-      <div className="p-14">
+    <div >
+      <div className="p-14 max-w-[900px]">
         {
           !wallet && (
             <button className="bg-white text-black px-14 py-4 rounded-full mb-4" onClick={onLoginClick}>Sign In</button>
@@ -74,7 +77,12 @@ export default function Profile() {
         }
         <h1 className="text-3xl my-3">{profile?.handle}</h1>
         <h3 className="text-xl mb-4">{profile?.bio}</h3>
-        { profile && <Publications profile={profile} /> }
+        
+        { profile && 
+        <>
+          { profile?.ownedBy === wallet?.ownedBy && <NewPost profile={profile} /> }
+          <Publications profile={profile} />
+        </>  }
       </div>
     </div>
   )
