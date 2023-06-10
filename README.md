@@ -43,14 +43,18 @@ Lens collect carbon retirements
 - Deploy app on localhost
   - works for Niels and Robert
 - Set SDK to testnet
-  - question asked in discord by Robert
+  - done -> in layout.tsx, try some reloads
+- 
 - Create 2 lens profiles on testnet or use two existing
   - try using testnet API https://docs.lens.xyz/docs/deployed-contract-addresses#mumbai-testnet-addresses
   - created with https://lens-do-it.vercel.app/
   - on testnet.lenster.xyz created post with one account
-  - 
+
 
 - Implement publish/collect functions in app
+  - Basic functionality in development
+  - Currently being debugged
+
 - Implement BCTRetireCollect function in app
   - Test functionality using testnet.lenster.xyz and polygonscan
   - use profiles from above
