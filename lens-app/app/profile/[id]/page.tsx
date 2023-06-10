@@ -24,8 +24,6 @@ export default function Profile() {
 
   let { data: profile, loading } = useProfile({ handle })
 
-  console.log("profile", profile, wallet);
-
   const { connectAsync } = useConnect({
     connector: new InjectedConnector(),
   });
@@ -80,7 +78,7 @@ export default function Profile() {
         
         { profile && 
         <>
-          { profile?.ownedBy === wallet?.ownedBy && <PostComposer profile={profile} /> }
+          { profile?.ownedBy === wallet?.ownedBy && <PostComposer profile={wallet} /> }
           <Publications profile={profile} />
         </>  }
       </div>

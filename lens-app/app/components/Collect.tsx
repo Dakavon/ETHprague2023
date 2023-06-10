@@ -48,7 +48,7 @@ export function Collect({
                 )
               }
               <div className="flex items-center space-x-2">
-              <ApproveCollect publication={pub} />
+              {wallet && <ApproveCollect publication={pub} />}
               <button className="btn" onClick={handleClick}>Collect</button>
               </div>
             </div>
