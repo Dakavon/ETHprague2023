@@ -1,56 +1,35 @@
-# ToucanFrens @ETHBerlin³
+```                                                                                                                       
+     &&&&&                        &&&&&&&&&&&&&&&&&&&&&&&&     &&&&&&&&&&              &&&&&         /&&&&&&&&&&&&&&&&&           
+     &&&&&                        &&&&&&&&&&&&&&&&&&&&&&&&     &&&&  &&&&&             &&&&&       &&&&&&(        .&&&&&&*        
+     &&&&&                        &&&&&                        &&&&   &&&&&            &&&&&      &&&&/               &&&&&       
+     &&&&&                        &&&&&                        &&&&    &&&&&           &&&&&     &&&&&                 &&&&,      
+     &&&&&                        &&&&&                        &&&&     &&&&&          &&&&&     &&&&&                 &&&&&      
+     &&&&&                        &&&&&                        &&&&      &&&&&         &&&&&      &&&&&&                          
+     &&&&&                        &&&&&                        &&&&       &&&&%        &&&&&        &&&&&&&&&&&                   
+     &&&&&                        &&&&&&&&&&&&&&&&&&&&         &&&&        &&&&/       &&&&&             &&&&&&&&&&&&&&           
+     &&&&&                        &&&&&                        &&&&         &&&&*      &&&&&                     ,&&&&&&&&        
+     &&&&&                        &&&&&                        &&&&          &&&&      &&&&&                          (&&&&&      
+     &&&&&                        &&&&&                        &&&&           &&&&     &&&&&    &&&&&                   &&&&      
+     &&&&&                        &&&&&                        &&&&            &&&&    &&&&&     &&&&                   &&&&      
+     &&&&&                        &&&&&                        &&&&            *&&&&   &&&&&     /&&&&&                &&&&&      
+     &&&&&&&&&&&&&&&&&&&&&&&&&    &&&&&&&&&&&&&&&&&&&&&&&&     &&&&             (&&&&  &&&&&       &&&&&&&         &&&&&&&        
+     &&&&&&&&&&&&&&&&&&&&&&&&&    &&&&&&&&&&&&&&&&&&&&&&&&     &&&&              %&&&&&&&&&&          &&&&&&&&&&&&&&&&&,          
+                                                                                                                                  
+                                                                                                                                  
+                                                                                                                                  
 
-<img src="img/ToucanFrens-logo.png" width="250" />
-
----
-
-## Contract addresses on mumbai
-
-| Contract                  | Mumbai                                                                                                                          |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| NCT Retire Collect Module | [0xe8C0BF8Cc8bDD7a764E81DF7490A30fbf0FC8E89](https://mumbai.polygonscan.com/address/0xe8C0BF8Cc8bDD7a764E81DF7490A30fbf0FC8E89) |
-| Toucan NCT                | [0x7beCBA11618Ca63Ead5605DE235f6dD3b25c530E](https://mumbai.polygonscan.com/address/0x7becba11618ca63ead5605de235f6dd3b25c530e) |
-| Toucan OffsetHelper       | [0x30dC279166DCFB69F52C91d6A3380dCa75D0fCa7](https://mumbai.polygonscan.com/address/0x30dC279166DCFB69F52C91d6A3380dCa75D0fCa7) |
-| Toucan Swapper            | [0xDd052AcA9AC1492a8b4F1432B68f11989903dE4d](https://mumbai.polygonscan.com/address/0xDd052AcA9AC1492a8b4F1432B68f11989903dE4d) |
-
----
-
----
-
----
-
-```
-     &&&&&                        &&&&&&&&&&&&&&&&&&&&&&&&     &&&&&&&&&&              &&&&&         /&&&&&&&&&&&&&&&&&
-     &&&&&                        &&&&&&&&&&&&&&&&&&&&&&&&     &&&&  &&&&&             &&&&&       &&&&&&(        .&&&&&&*
-     &&&&&                        &&&&&                        &&&&   &&&&&            &&&&&      &&&&/               &&&&&
-     &&&&&                        &&&&&                        &&&&    &&&&&           &&&&&     &&&&&                 &&&&,
-     &&&&&                        &&&&&                        &&&&     &&&&&          &&&&&     &&&&&                 &&&&&
-     &&&&&                        &&&&&                        &&&&      &&&&&         &&&&&      &&&&&&
-     &&&&&                        &&&&&                        &&&&       &&&&%        &&&&&        &&&&&&&&&&&
-     &&&&&                        &&&&&&&&&&&&&&&&&&&&         &&&&        &&&&/       &&&&&             &&&&&&&&&&&&&&
-     &&&&&                        &&&&&                        &&&&         &&&&*      &&&&&                     ,&&&&&&&&
-     &&&&&                        &&&&&                        &&&&          &&&&      &&&&&                          (&&&&&
-     &&&&&                        &&&&&                        &&&&           &&&&     &&&&&    &&&&&                   &&&&
-     &&&&&                        &&&&&                        &&&&            &&&&    &&&&&     &&&&                   &&&&
-     &&&&&                        &&&&&                        &&&&            *&&&&   &&&&&     /&&&&&                &&&&&
-     &&&&&&&&&&&&&&&&&&&&&&&&&    &&&&&&&&&&&&&&&&&&&&&&&&     &&&&             (&&&&  &&&&&       &&&&&&&         &&&&&&&
-     &&&&&&&&&&&&&&&&&&&&&&&&&    &&&&&&&&&&&&&&&&&&&&&&&&     &&&&              %&&&&&&&&&&          &&&&&&&&&&&&&&&&&,
-
-
-
-
-                  _( )_      _                  wWWWw   _                        _( )_      _                  wWWWw   _
-      @@@@       (_   _)    ( )     _     @@@@  (___) _( )_          @@@@       (_   _)    ( )     _     @@@@  (___) _( )_
-     @@()@@ wWWWw  (_)\     ( )   _( )_  @@()@@   Y  (_   _)        @@()@@ wWWWw  (_)\     ( )   _( )_  @@()@@   Y  (_   _)
-      @@@@  (___)      |/   ( )  (_____)  @@@@   \|/   (_)\          @@@@  (___)      |/   ( )  (_____)  @@@@   \|/   (_)\
-       /      Y       \|    (_)     |     \|      |/       |          /      Y       \|    (_)     |     \|      |/      |
-    \ |      \|/       | / \ | /   \|/      |/    \       \|/      \ |      \|/       | / \ | /   \|/      |/    \       \|/
-      |       |        |     |      |       |     |        |         |       |        |     |      |       |     |        |
+                  _( )_      _                  wWWWw   _                        _( )_      _                  wWWWw   _       
+      @@@@       (_   _)    ( )     _     @@@@  (___) _( )_          @@@@       (_   _)    ( )     _     @@@@  (___) _( )_     
+     @@()@@ wWWWw  (_)\     ( )   _( )_  @@()@@   Y  (_   _)        @@()@@ wWWWw  (_)\     ( )   _( )_  @@()@@   Y  (_   _)    
+      @@@@  (___)      |/   ( )  (_____)  @@@@   \|/   (_)\          @@@@  (___)      |/   ( )  (_____)  @@@@   \|/   (_)\      
+       /      Y       \|    (_)     |     \|      |/       |          /      Y       \|    (_)     |     \|      |/      |     
+    \ |      \|/       | / \ | /   \|/      |/    \       \|/      \ |      \|/       | / \ | /   \|/      |/    \       \|/   
+      |       |        |     |      |       |     |        |         |       |        |     |      |       |     |        |    
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   _//|\_     |        |\ _//|\_   /|\      |\_   |\___    |\     _//|\_     |        |\ _//|\_   /|\      |\_   |\___    |\
-      | \_/  / \__    / \_   |        \   _/      |       _|         | \_/  / \__    / \_   |        \   _/      |       _|
-     /|\_  _/       _/\       \__     /\_        / \_      |_       /|\_  _/       _/\       \__     /\_        / \_      |_
-    / |     |        \___      \_     /\         \        /        / |     |        \___      \_     /\         \        /
+   _//|\_     |        |\ _//|\_   /|\      |\_   |\___    |\     _//|\_     |        |\ _//|\_   /|\      |\_   |\___    |\   
+      | \_/  / \__    / \_   |        \   _/      |       _|         | \_/  / \__    / \_   |        \   _/      |       _|    
+     /|\_  _/       _/\       \__     /\_        / \_      |_       /|\_  _/       _/\       \__     /\_        / \_      |_    
+    / |     |        \___      \_     /\         \        /        / |     |        \___      \_     /\         \        /                         
 
 ```
 
@@ -166,14 +145,14 @@ struct PublicationStruct {
 
 This is the standard publication type, akin to a regular post on traditional social media platforms. Posts contain:
 
-1. A URI, pointing to the actual publication body's metadata JSON, including any images or text.
+1. A URI, pointing to the actual publication body's [metadata](https://docs.lens.xyz/docs/metadata-standards) JSON, including any images or text.
 2. An uninitialized pointer, since pointers are only needed in mirrors and comments.
 
 ##### Comment
 
 This is a publication type that points back to another publication, whether it be a post, comment or mirror, akin to a regular comment on traditional social media. Comments contain:
 
-1. A URI, just like posts, pointing to the publication body's metadata JSON.
+1. A URI, just like posts, pointing to the publication body's [metadata](https://docs.lens.xyz/docs/metadata-standards) JSON.
 2. An initialized pointer, containing the profile ID and the publication ID of the publication commented on.
 
 ##### Mirror
