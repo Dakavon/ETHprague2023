@@ -2,6 +2,7 @@
 
 import { formatPicture } from "@/utils";
 import { AnyPublication, InsufficientAllowanceError, InsufficientFundsError, Profile, ProfileOwnedByMe, useActiveProfile, useCollect } from "@lens-protocol/react-web";
+import { ApproveCollect } from "./Approve";
 
 // TODO: Show if already following
 export function Collect({
@@ -46,7 +47,10 @@ export function Collect({
                   />
                 )
               }
+              <div className="flex items-center space-x-2">
+              <ApproveCollect publication={pub} />
               <button className="btn" onClick={handleClick}>Collect</button>
+              </div>
             </div>
       </>
     )

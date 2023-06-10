@@ -8,7 +8,7 @@ export function Publications({
   }) {
     let { data: publications } = usePublications({
       profileId: profile.id,
-      limit: 1,
+      limit: 10,
     })
     publications = publications?.map(publication => {
       if (publication.__typename === 'Mirror') {
