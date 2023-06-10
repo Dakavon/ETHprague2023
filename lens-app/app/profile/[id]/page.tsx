@@ -9,7 +9,7 @@ import { InjectedConnector } from 'wagmi/connectors/injected';
 import { formatPicture } from '../../../utils';
 import { Follow } from '@/app/components/Follow';
 import { Publications } from '@/app/components/Publications';
-import { NewPost } from '@/app/components/NewPost';
+import { PostComposer } from '@/app/components/PostComposer';
 
 export default function Profile() {
   // new hooks
@@ -80,7 +80,7 @@ export default function Profile() {
         
         { profile && 
         <>
-          { profile?.ownedBy === wallet?.ownedBy && <NewPost profile={profile} /> }
+          { profile?.ownedBy === wallet?.ownedBy && <PostComposer profile={profile} /> }
           <Publications profile={profile} />
         </>  }
       </div>
