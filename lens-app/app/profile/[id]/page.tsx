@@ -2,13 +2,14 @@
 'use client'
 import { usePathname } from 'next/navigation';
 // new imports
-import {
-  useProfile, usePublications, useFollow, useWalletLogin, useWalletLogout, useActiveProfile,
-  Profile, ProfileOwnedByMe, NotFoundError
+import { useProfile, usePublications, useWalletLogin, useWalletLogout, useActiveProfile,
+  Profile
 } from '@lens-protocol/react-web';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useChainId, useConnect, useDisconnect } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { formatPicture } from '../../../utils';
+import { Follow } from '@/app/components/Follow';
+import { Collect } from '@/app/components/Collect';
 
 export default function Profile() {
   // new hooks
@@ -17,6 +18,8 @@ export default function Profile() {
   const { data: wallet } = useActiveProfile();
   const { isConnected } = useAccount();
   const { disconnectAsync } = useDisconnect();
+  const chainId = useChainId();
+  console.log("chainId 2", chainId)
   
   const pathName = usePathname()
   const handle = pathName?.split('/')[2]
@@ -52,7 +55,7 @@ export default function Profile() {
         {
           wallet && profile && (
             <>
-            <FollowComponent
+            <Follow
               isConnected={isConnected}
               profile={profile}
               wallet={wallet}
@@ -80,31 +83,6 @@ export default function Profile() {
   )
 }
 
-// new component
-function FollowComponent({
-  wallet,
-  profile,
-  isConnected
-} : {
-  isConnected: boolean,
-  profile: Profile,
-  wallet: ProfileOwnedByMe
-}) {
-  const { execute: follow } = useFollow({ followee: profile, follower: wallet  });
-  return (
-    <>
-      {
-        isConnected && (
-          <button
-            className="bg-white text-black px-14 py-4 rounded-full"
-            onClick={follow}
-          >Follow {profile.handle}</button>
-        )
-      }
-    </>
-  )
-}
-
 function Publications({
   profile
 }: {
@@ -126,22 +104,10 @@ function Publications({
     <>
       {
         publications?.map((pub: any, index: number) => (
-          <div key={index} className="py-4 bg-zinc-900 rounded mb-3 px-4">
-            <p>{pub.metadata.content}</p>
-            {
-              pub.metadata?.media[0]?.original && ['image/jpeg', 'image/png'].includes(pub.metadata?.media[0]?.original.mimeType) && (
-                <img
-                  width="400"
-                  height="400"
-                  alt={profile.handle}
-                  className='rounded-xl mt-6 mb-2'
-                  src={formatPicture(pub.metadata.media[0])}
-                />
-              )
-            }
-          </div>
+          <Collect key={index} pub={pub} profile={profile}/>
         ))
     }
     </>
   )
 }
+
