@@ -7,11 +7,11 @@ async function main() {
   const accounts = await ethers.getSigners();
   const governance = accounts[0];
 
-  const lensHub_proxy = '0x7582177F9E536aB0b6c721e11f383C326F2Ad1D5';
-  const NCTRetireCollectModuleAddr = '0xe8C0BF8Cc8bDD7a764E81DF7490A30fbf0FC8E89';
+  const MOCKSANDBOX_GOVERNANCE = "0x1677d9cc4861f1c85ac7009d5f06f49c928ca2ad"; //sandbox mumbai testnet
+  const NCTRetireCollectModuleAddr = '0xc7Fc79a25597bae5CEE7BFca359398375a7Ab1ab'; //deployed on sandbox mumbai testnet
 
   //Lens core
-  const lensHub = LensHub__factory.connect(lensHub_proxy, governance);
+  const lensHub = LensHub__factory.connect(MOCKSANDBOX_GOVERNANCE, governance);
 
   //Execution
   await waitForTx(lensHub.whitelistCollectModule(NCTRetireCollectModuleAddr, true));
