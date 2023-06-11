@@ -70,7 +70,19 @@ const config: HardhatUserConfig = {
     main: getCommonNetworkConfig(eEthereumNetwork.main, 1),
     tenderlyMain: getCommonNetworkConfig(eEthereumNetwork.tenderlyMain, 3030),
     matic: getCommonNetworkConfig(ePolygonNetwork.matic, 137),
-    mumbai: getCommonNetworkConfig(ePolygonNetwork.mumbai, 80001),
+    sandbox: getCommonNetworkConfig(ePolygonNetwork.mumbai, 80001),
+    //mumbai: getCommonNetworkConfig(ePolygonNetwork.mumbai, 80001),
+    mumbai: {
+      url: process.env.MUMBAI_RPC_URL,
+      gas: DEFAULT_BLOCK_GAS_LIMIT,
+      gasPrice: 2000000000, // 2 gwei
+      accounts: {
+        mnemonic: MNEMONIC,
+        path: MNEMONIC_PATH,
+        initialIndex: 0,
+        count: 10,
+      },
+    },
     xdai: getCommonNetworkConfig(eXDaiNetwork.xdai, 100),
     hardhat: {
       hardfork: 'london',
@@ -85,6 +97,15 @@ const config: HardhatUserConfig = {
         balance,
       })),
       forking: mainnetFork,
+    },
+    local: {
+      url: 'http://127.0.0.1:8545/',
+      accounts: {
+        mnemonic: MNEMONIC,
+        path: MNEMONIC_PATH,
+        initialIndex: 0,
+        count: 20,
+      },
     },
   },
   gasReporter: {
