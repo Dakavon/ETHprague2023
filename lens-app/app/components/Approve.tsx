@@ -1,20 +1,24 @@
-import { useApproveModule, CollectablePublication, TokenAllowanceLimit, Amount, Erc20 } from '@lens-protocol/react-web';
+import { useApproveModule, CollectablePublication, TokenAllowanceLimit, useCurrencies, Amount, Erc20 } from '@lens-protocol/react-web';
 
 export function ApproveCollect({ publication }: { publication: CollectablePublication }) {
   const {execute: approveModule} = useApproveModule();
+  const { data: currencies } = useCurrencies();
 
   const handleClick = async () => {
-    if(!publication.collectModule.feeOptional?.amount?.asset) return;
+
+    // @ts-ignore
     const fee = publication.collectModule.feeOptional.amount.value;
+    // @ts-ignore
     const tokenAddress = publication.collectModule.feeOptional.amount.asset.address;
-    console.log("publication", publication, fee, tokenAddress)
+
     if (fee > 0 && tokenAddress) {
       const result = await approveModule({
         // The collect fee amount
-        amount: fee as Amount<Erc20>,
+        // @ts-ignore
+        amount: Amount.erc20(currencies[0], fee),
 
         // The collect module contract address
-        spender: tokenAddress,
+        spender: publication.collectPolicy.contractAddress,
 
         // In this case we want to  approve the exact amount
         limit: TokenAllowanceLimit.EXACT,
