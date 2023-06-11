@@ -4,8 +4,6 @@ import { CreateProfileDataStruct } from '../typechain-types/LensHub';
 import { waitForTx, ZERO_ADDRESS } from '../tasks/helpers/utils';
 
 task('create-profile', 'creates a profile').setAction(async ({}, hre) => {
-  //const provider = new hre.ethers.providers.JsonRpcProvider(String(process.env.MUMBAI_RPC_URL));
-  //const user = new hre.ethers.Wallet(String(process.env.USER_PRIVATE_KEY), provider);
 
   const accounts = await hre.ethers.getSigners();
   const user = accounts[0];
@@ -29,7 +27,8 @@ task('create-profile', 'creates a profile').setAction(async ({}, hre) => {
     followNFTURI: 'https://ipfs.io/ipfs/QmTFLSXdEQ6qsSzaXaCSNtiv6wA56qq87ytXJ182dXDQJS',
   };
 
-//   await waitForTx(profileCreation.proxyCreateProfile(inputStruct, { gasLimit: 20000000, gasPrice: 2000000000 }));
+  //commented out because profile already created
+  //await waitForTx(profileCreation.proxyCreateProfile(inputStruct, { gasLimit: 20000000, gasPrice: 2000000000 }));
 
   const profileID = await lensHub.getProfileIdByHandle('lenscarbon.test');
   console.log(`Total supply: ${await lensHub.totalSupply()}`);
