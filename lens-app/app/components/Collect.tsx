@@ -1,7 +1,7 @@
 // new component
 
 import { formatPicture } from "@/utils";
-import { AnyPublication, InsufficientAllowanceError, InsufficientFundsError, Profile, ProfileOwnedByMe, useActiveProfile, useCollect } from "@lens-protocol/react-web";
+import { InsufficientAllowanceError, InsufficientFundsError, Profile, ProfileOwnedByMe, useActiveProfile, useCollect } from "@lens-protocol/react-web";
 import { ApproveCollect } from "./Approve";
 
 // TODO: Show if already following
@@ -12,7 +12,7 @@ export function Collect({
     profile: Profile
   }) {
     const { data: wallet } = useActiveProfile();
-    const { execute: collect, isPending: loading, error } = useCollect({collector: wallet as ProfileOwnedByMe, publication: pub});
+    const { execute: collect, error } = useCollect({collector: wallet as ProfileOwnedByMe, publication: pub});
 
     async function handleClick() {
       try {
@@ -20,8 +20,6 @@ export function Collect({
       } catch (e) {
         console.log(e);
     }
-
-    console.log("collect", loading, error);
 
     if (error instanceof InsufficientFundsError) {
       alert('Insufficient funds');

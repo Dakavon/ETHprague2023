@@ -78,7 +78,7 @@ export default function Profile() {
         
         { profile && 
         <>
-          { profile?.ownedBy === wallet?.ownedBy && <PostComposer profile={wallet} /> }
+          { profile?.ownedBy === wallet?.ownedBy && <PostComposer publisher={wallet} /> }
           <Publications profile={profile} />
         </>  }
       </div>

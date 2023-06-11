@@ -24,7 +24,6 @@ export function ApproveCollect({ publication }: { publication: CollectablePublic
         // In this case we want to  approve the exact amount
         limit: TokenAllowanceLimit.EXACT,
       })
-      console.log("result", result);
     }
   };
   
