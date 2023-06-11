@@ -27,8 +27,7 @@ async function main() {
     followNFTURI: 'https://ipfs.io/ipfs/QmTFLSXdEQ6qsSzaXaCSNtiv6wA56qq87ytXJ182dXDQJS',
   };
 
-  // await waitForTx(profileCreation.connect(user).proxyCreateProfile(inputStruct));
-  //perform profile creation with setting manual gas limit
+  //commented out because profile already created
   //await waitForTx(profileCreation.connect(user).proxyCreateProfile(inputStruct, { gasLimit: 200000 }));
 
   const profileID = await lensHub.getProfileIdByHandle(userName);
