@@ -4,6 +4,11 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { deployWithVerify } from '../../helpers/utils';
 import { PartialCarbonRetirementCollectModule__factory, LensHub__factory } from '../../../typechain';
 
+// External contract addresses
+// Hard-coded for testnet, NOT SUITABLE FOR PRODUCTION!
+// Alternative: inject values from an environment variable// Hard-coded for testnet, not suitable for production
+const RETIREMENT_HELPER_ADDRESS = '0x802fd78B14bF8d0cc0Ba0325351887a323432B70';
+
 export let runtimeHRE: HardhatRuntimeEnvironment;
 
 task(
@@ -20,8 +25,8 @@ task(
     const governance = accounts[1];
 
     console.log('\n\n- - - - - - - - Deploying partial carbon retirement fee collect module\n\n');
-    const PartialCarbonRetirementCollectModule = await deployWithVerify(
-      new PartialCarbonRetirementCollectModule__factory(deployer).deploy(hub, globals),
+    const partialCarbonRetirementCollectModule = await deployWithVerify(
+      new PartialCarbonRetirementCollectModule__factory(deployer).deploy(hub, globals, RETIREMENT_HELPER_ADDRESS),
       [hub, globals],
       'contracts/collect/PartialCarbonRetirementCollectModule.sol:PartialCarbonRetirementCollectModule'
     );

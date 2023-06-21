@@ -292,7 +292,7 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         );
     }
 
-        /**
+    /**
      * @dev Tranfers the fee to recipient
      *
      * Override this to add additional functionality (e.g. multiple recipients)

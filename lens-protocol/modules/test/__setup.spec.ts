@@ -49,6 +49,10 @@ import {
   DegreesOfSeparationReferenceModule__factory,
   StepwiseCollectModule,
   StepwiseCollectModule__factory,
+  PartialCarbonRetirementCollectModule,
+  PartialCarbonRetirementCollectModule__factory,
+  MockKlimaRetirementAggregator,
+  MockKlimaRetirementAggregator__factory,
 } from '../typechain';
 import { LensHubLibraryAddresses } from '../typechain/factories/LensHub__factory';
 import { ProfileFollowModule__factory } from '../typechain/factories/ProfileFollowModule__factory';
@@ -119,10 +123,15 @@ export let aaveFeeCollectModule: AaveFeeCollectModule;
 export let updatableOwnableFeeCollectModule: UpdatableOwnableFeeCollectModule;
 export let stepwiseCollectModule: StepwiseCollectModule;
 export let erc4626FeeCollectModule: ERC4626FeeCollectModule;
+export let partialCarbonRetirementCollectModule: PartialCarbonRetirementCollectModule;
 
 export let degreesOfSeparationReferenceModule: DegreesOfSeparationReferenceModule;
 
 export let tokenGatedReferenceModule: TokenGatedReferenceModule;
+
+//helpers (from addBCTRetirement...Module)
+export let carbonToken: Currency;
+export let mockKlimaRetirementAggregator: MockKlimaRetirementAggregator;
 
 export function makeSuiteCleanRoom(name: string, tests: () => void) {
   describe(name, () => {
@@ -297,6 +306,16 @@ beforeEach(async function () {
   await expect(
     lensHub.connect(governance).whitelistCollectModule(stepwiseCollectModule.address, true)
   ).to.not.be.reverted;
+
+  // Carbon Offset Retirement Collect modules
+  //carbonToken = await new Currency__factory(deployer).deploy();
+  mockKlimaRetirementAggregator = await new MockKlimaRetirementAggregator__factory(deployer).deploy();
+  partialCarbonRetirementCollectModule = await new PartialCarbonRetirementCollectModule__factory(deployer).deploy(
+    lensHub.address,
+    moduleGlobals.address,
+    //carbonToken.address,
+    mockKlimaRetirementAggregator.address
+    );
 
   // Unpausing protocol
   await expect(lensHub.connect(governance).setState(ProtocolState.Unpaused)).to.not.be.reverted;
