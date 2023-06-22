@@ -11,7 +11,9 @@ import {FeeModuleBase} from '@aave/lens-protocol/contracts/core/modules/FeeModul
 import {ModuleBase} from '@aave/lens-protocol/contracts/core/modules/ModuleBase.sol';
 import {FollowValidationModuleBase} from '@aave/lens-protocol/contracts/core/modules/FollowValidationModuleBase.sol';
 
-import {BaseFeeCollectModule} from './base/BaseFeeCollectModule.sol';
+//import {BaseFeeCollectModule} from './base/BaseFeeCollectModule.sol';
+//import {BaseFeeCollectModuleInitData, BaseProfilePublicationData} from './base/IBaseFeeCollectModule.sol';
+
 import {IKlimaRetirementAggregator} from '../interfaces/IKlimaRetirementAggregator.sol';
 
 /**
@@ -42,7 +44,6 @@ struct ProfilePublicationData {
 
 /**
  * @notice A struct containing the necessary data to initialize Stepwise Collect Module.
- *
  * @param recipientAmount The collecting cost associated with this publication. 0 for free collect.
  * @param collectLimit The maximum number of collects for this publication (0 for unlimited)
  * @param currency The currency associated with this publication.
@@ -64,7 +65,6 @@ struct PartialCarbonRetirementCollectModuleInitData {
     address poolToken;
     uint160 retirementAmount;
 }
-
 
 
 /**
@@ -122,16 +122,12 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
 
             if (
                 !_currencyWhitelisted(initData.currency) ||
-                initData.recipient == address(0) ||
+                //initData.recipient == address(0) || // TODO: should this be included?
                 initData.referralFee > BPS_MAX ||
                 (initData.endTimestamp != 0 && initData.endTimestamp < block.timestamp) 
-
-                // TODO: Check if it's possible to check whether currency has a swap path to poolToken
-                // see e.g. https://github.com/KlimaDAO/klimadao-solidity/blob/e1b1037908be955d34bcf2987f124bb4d7ad62de/src/retirement_v1/RetireToucanCarbon.sol#L561
-
-
             ) revert Errors.InitParamsInvalid();
         }
+
         _dataByPublicationByProfile[profileId][pubId] = ProfilePublicationData({
             recipientAmount: initData.recipientAmount,
             currency: initData.currency,
@@ -208,10 +204,19 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
     ) internal virtual {
 
         address currency = _dataByPublicationByProfile[profileId][pubId].currency;
+        uint160 recipientAmount = _dataByPublicationByProfile[profileId][pubId].recipientAmount;
 
+        // TODO: this part is not understood, with regards to calldata. Also unclear if it makes sense.
+        // this validation is regarding the core funtionality without the retirement
+        _validateDataIsExpected(data, currency, recipientAmount);
+        // this validation is regarding the retirement
+        _validateCarbonDataIsExpected(data, currency, _dataByPublicationByProfile[profileId][pubId].retirementAmount);
+
+
+        uint160 remainingAmount = 0;
         // Attempt retirement
         // TODO: If retirement fails, send to publisher
-        _retireCarbon(
+        remainingAmount = _retireCarbon(
             collector, 
             collector,
             pubId,
@@ -220,10 +225,8 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             _dataByPublicationByProfile[profileId][pubId].retirementAmount
             );
 
-        // fee is on whatever publisher gets, either intended share or everything if retirement failed
-        uint160 recipientAmount = _dataByPublicationByProfile[profileId][pubId].recipientAmount;
-        
-        _validateDataIsExpected(data, currency, recipientAmount);
+        // TODO: Make remaining amount visible to publisher that it's intended for retirement
+        recipientAmount += remainingAmount;
 
         (address treasury, uint16 treasuryFee) = _treasuryData();
         uint256 treasuryAmount = (recipientAmount * treasuryFee) / BPS_MAX;
@@ -265,23 +268,26 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         address currency,
         address poolToken,
         uint256 retirementAmount
-    ) internal {
+    ) internal returns (uint160) {
 
         // TODO: check first that liquidity of poolToken is sufficient or that swap route works
         // check if otherwise the risk exists that erc20 transfer is successful, but retirement fails
+        
+        // Swap adjusted fee to carbon and retire
+        string memory retirementMessage = string(abi.encodePacked(
+            "Lens Protocol carbon retirement for collect of publication: ",
+            Strings.toString(pubId)
+        ));
+
+
 
         // TODO: does Lens only use erc20 tokens for collects or are native currency or other allowed, too?
         // In that case, handle those currencies accordingly
         // Transfer retirementAmount to be retired to the retirement helper contract
         IERC20(currency).safeTransferFrom(collector, RETIREMENT_HELPER, retirementAmount);
 
-        // Swap adjusted fee to carbon and retire
-        string memory retirementMessage = string(abi.encodePacked(
-            "Lens Protocol carbon retirement for collect of publication: ",
-            Strings.toString(pubId)
-        ));
         IKlimaRetirementAggregator(RETIREMENT_HELPER).retireCarbonFrom(
-            beneficiary,
+            beneficiary, //TODO: should this be collector, because above safeTransferFrom was done from collector?
             currency,
             poolToken,
             retirementAmount,
@@ -290,6 +296,10 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             "Lens Protocol Profile",
             retirementMessage
         );
+
+        //TODO: how to implement reversal when retirement fails??
+        uint160 remainingAmount = 0;
+        return remainingAmount;
     }
 
     /**
@@ -316,6 +326,18 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             IERC20(currency).safeTransferFrom(collector, recipient, amount);
         }
     }
+
+    // TODO: this part is not understood, with regards to calldata. Also unclear if it makes sense.
+    function _validateCarbonDataIsExpected(
+        bytes calldata data,
+        address currency,
+        uint256 amount
+    ) internal pure {
+        (address decodedCurrency, uint256 decodedAmount) = abi.decode(data, (address, uint256));
+        if (decodedAmount != amount || decodedCurrency != currency)
+            revert Errors.ModuleDataMismatch();
+    }
+    
 
     /**
      * @notice Returns the publication data for a given publication, or an empty struct if that publication was not
