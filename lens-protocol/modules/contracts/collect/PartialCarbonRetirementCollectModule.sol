@@ -16,6 +16,12 @@ import {FollowValidationModuleBase} from '@aave/lens-protocol/contracts/core/mod
 
 import {IKlimaRetirementAggregator} from '../interfaces/IKlimaRetirementAggregator.sol';
 
+// TODO: check and implement switch from recipientAmount, retirementAmount to
+// amount, retirementFraction
+// reason: initial idea was to avoid the calculation of recipientAmount, retirementAmount
+// during each collect, but current implementation might be problematic with spending
+// allowance of the currency (would require allowance of sum of the amounts)
+
 /**
  * @notice A struct containing the necessary data to execute collect actions on a publication.
  * @param recipientAmount The collecting cost associated with this publication. 0 for free collect.
@@ -66,7 +72,6 @@ struct PartialCarbonRetirementCollectModuleInitData {
     uint160 retirementAmount;
 }
 
-
 /**
  * @title PartialCarbonRetirementCollectModule
  * @author Lens Protocol
@@ -85,7 +90,6 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
     constructor(address hub, address moduleGlobals, address retirementHelper) FeeModuleBase(moduleGlobals) ModuleBase(hub) {
         RETIREMENT_HELPER = retirementHelper;
     }
-
 
     /**
      * @notice This collect module levies a fee on collects and supports referrals. Thus, we need to decode data.
@@ -112,15 +116,8 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             (PartialCarbonRetirementCollectModuleInitData)
         );
         {
-            // Standalone check for better error message
-            require(IKlimaRetirementAggregator(RETIREMENT_HELPER).isPoolToken(initData.poolToken), "Pool Token Not Accepted.");
-            
-            // Function abuse to check if path from currency to poolToken exists
-            // TODO: Make sure the requirement really fails if no path exists. 
-            (uint256 checkedSourceAmount, ) = IKlimaRetirementAggregator(RETIREMENT_HELPER).getSourceAmount(initData.currency, initData.poolToken, initData.retirementAmount, false);
-            require(checkedSourceAmount > 0, "No swap path from currency to poolToken found.");
-
             if (
+                !checkRetirementSwapFeasibility(initData.currency, initData.poolToken, initData.retirementAmount) ||
                 !_currencyWhitelisted(initData.currency) ||
                 //initData.recipient == address(0) || // TODO: should this be included?
                 initData.referralFee > BPS_MAX ||
@@ -142,7 +139,6 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         });
         return data;
     }
-
 
     /**
      * @dev Processes a collect by:
@@ -184,7 +180,6 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         }
     }
 
-
     /**
      * @dev Internal processing of a collect:
      *  1. Calculation of fees
@@ -212,20 +207,23 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         // this validation is regarding the retirement
         _validateCarbonDataIsExpected(data, currency, _dataByPublicationByProfile[profileId][pubId].retirementAmount);
 
-        uint160 remainingAmount = 0;
         // Attempt retirement
-        // TODO: If retirement fails, send to publisher
-        remainingAmount = _retireCarbon(
-            collector, 
-            collector,
-            pubId,
-            currency,
-            _dataByPublicationByProfile[profileId][pubId].poolToken,
-            _dataByPublicationByProfile[profileId][pubId].retirementAmount
-            );
-
-        // TODO: Make remaining amount visible to publisher that it's intended for retirement
-        //recipientAmount += remainingAmount;
+        // TODO: Do only if checkSwapFeasibility works.
+        // Otherwise skip and either send everything to publisher or leave retirementAmount in collectors wallet.
+        if (checkRetirementSwapFeasibility(
+            currency, 
+            _dataByPublicationByProfile[profileId][pubId].poolToken, 
+            _dataByPublicationByProfile[profileId][pubId].retirementAmount))
+            {
+                _retireCarbon(
+                    collector, 
+                    collector,
+                    pubId,
+                    currency,
+                    _dataByPublicationByProfile[profileId][pubId].poolToken,
+                    _dataByPublicationByProfile[profileId][pubId].retirementAmount
+                    );
+            }
 
         (address treasury, uint16 treasuryFee) = _treasuryData();
         uint256 treasuryAmount = (recipientAmount * treasuryFee) / BPS_MAX;
@@ -237,7 +235,6 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             IERC20(currency).safeTransferFrom(collector, treasury, treasuryAmount);
         }
     }
-
 
     /**
      * @dev Internal processing of a collect:
@@ -267,17 +264,15 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         address currency,
         address poolToken,
         uint256 retirementAmount
-    ) internal returns (uint160) {
-
-        // TODO: check first that liquidity of poolToken is sufficient or that swap route works
-        // check if otherwise the risk exists that erc20 transfer is successful, but retirement fails
+    ) internal {
+        // TODO: do in calling function, not here, to be able to wrap into if statement
+        // require(checkRetirementSwapFeasibility(currency, poolToken, retirementAmount));
         
         // Swap adjusted fee to carbon and retire
         string memory retirementMessage = string(abi.encodePacked(
             "Lens Protocol carbon retirement for collect of publication: ",
             Strings.toString(pubId)
         ));
-
 
         // TODO: does Lens only use erc20 tokens for collects or are native currency or other allowed, too?
         // In that case, handle those currencies accordingly
@@ -294,10 +289,6 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             "Lens Protocol Profile",
             retirementMessage
         );
-
-        //TODO: how to implement reversal when retirement fails??
-        uint160 remainingAmount = 0;
-        return remainingAmount;
     }
 
     /**
@@ -336,6 +327,60 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             revert Errors.ModuleDataMismatch();
     }
     
+    /**
+     * @dev Check if retirementAggregator can swap from currency to poolToken:
+     *
+     * @param _sourceToken Address of the source token that is used to pay the retirement.
+     * @param _poolToken Address of the carbon pool token that is used for retirement.
+     * @param _amount Amount of the source token that is used for retirement.
+     *
+     * @return The ProfilePublicationData struct mapped to that publication.
+     */
+    function checkRetirementSwapFeasibility(
+        address _sourceToken,
+        address _poolToken,
+        uint256 _amount
+    ) external view returns (bool) {
+
+        // TODO: This function should not fail, but always return true/false
+        // Reason: 
+        // - During module init, it doesn't matter. It can also fail.
+        // - During processCollect, it should not fail, but instead lead to normal collect.
+
+        try IKlimaRetirementAggregator(RETIREMENT_HELPER).isPoolToken(_poolToken) returns (bool result) {
+            emit Log("poolToken accepted": result);
+        } catch {
+            emit Log("poolToken not accepted.");
+            return false;
+        }
+
+        //require(IKlimaRetirementAggregator(RETIREMENT_HELPER).isPoolToken(_poolToken), "Pool Token Not Accepted.");
+        
+        // Check if path from currency to poolToken exists
+        // TODO: Make sure the requirement really fails if no path exists. 
+        // Behaviour:
+        // No swap path exists: will raise error and revert transaction
+        // -> collect would fail
+        // Swap path exists: will return numbers for checkedSourceAmount and checkedPoolAmount
+        // -> collect would succeed
+        // Liquidity low: will return values, but checkedPoolAmount will saturate to a max value
+        // -> I guess, collect would succeed, but retired carbon would be low
+        try IKlimaRetirementAggregator(RETIREMENT_HELPER).getSourceAmount(_sourceToken, _poolToken, _amount, false) returns (uint256 checkedSourceAmount, uint256 checkedPoolAmount) {
+            emit Log("poolAmount is": checkedPoolAmount);
+            if (checkedPoolAmount !> 0) {
+                emit Log("poolAmount is not greater zero");
+                return false;
+            }
+        } catch {
+            emit Log("Swap path from sourceToken to poolToken not found.");
+            return false;
+        }
+
+        //(uint256 checkedSourceAmount, uint256 checkedPoolAmount) = IKlimaRetirementAggregator(RETIREMENT_HELPER).getSourceAmount(_sourceToken, _poolToken, _amount, false);
+        //require(checkedPoolAmount > 0, "No swap path from currency to poolToken found.");
+        // return true only if no fail
+        return true;
+    }
 
     /**
      * @notice Returns the publication data for a given publication, or an empty struct if that publication was not

@@ -44,8 +44,11 @@
 
 ### check feasibility of retirements during module init
 - check that poolToken is supported and swap route from currency to poolToken exists
+- ==> see file retirementAggregator.md for details
 - ? is check of liquidiy a good idea?
   - perhaps liquidity check in frontend?
+
+
 
 ### implement fallback for retirement failure
 - ? retirement has a ERC20 transfer first -> can this be reverted?
