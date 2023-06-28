@@ -212,7 +212,6 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         // this validation is regarding the retirement
         _validateCarbonDataIsExpected(data, currency, _dataByPublicationByProfile[profileId][pubId].retirementAmount);
 
-
         uint160 remainingAmount = 0;
         // Attempt retirement
         // TODO: If retirement fails, send to publisher
@@ -226,7 +225,7 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             );
 
         // TODO: Make remaining amount visible to publisher that it's intended for retirement
-        recipientAmount += remainingAmount;
+        //recipientAmount += remainingAmount;
 
         (address treasury, uint16 treasuryFee) = _treasuryData();
         uint256 treasuryAmount = (recipientAmount * treasuryFee) / BPS_MAX;
@@ -278,7 +277,6 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             "Lens Protocol carbon retirement for collect of publication: ",
             Strings.toString(pubId)
         ));
-
 
 
         // TODO: does Lens only use erc20 tokens for collects or are native currency or other allowed, too?

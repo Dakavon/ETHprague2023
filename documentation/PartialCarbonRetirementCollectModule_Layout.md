@@ -19,6 +19,9 @@
 - if retirement fails, the retirementAmount should go to publisher, minus lens fee
   - publisher has inventive to perform retirement later
   - lens fee so that this system cannot be gamed
+- OR: 
+  - check if failures can really happen that often
+  - treat module as PoC, before lens V2, and see how it goes    
 
 ### fair lens fee
 - fee for lens treasury should be only charged on amount that goes to publisher, not retirement amount
@@ -41,7 +44,8 @@
 
 ### check feasibility of retirements during module init
 - check that poolToken is supported and swap route from currency to poolToken exists
-- is check of liquidiy a good idea?
+- ? is check of liquidiy a good idea?
+  - perhaps liquidity check in frontend?
 
 ### implement fallback for retirement failure
 - ? retirement has a ERC20 transfer first -> can this be reverted?
