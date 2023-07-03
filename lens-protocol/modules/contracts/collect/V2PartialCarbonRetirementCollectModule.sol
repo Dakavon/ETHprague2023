@@ -403,17 +403,12 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             return false;
             };
 
-        // TODO: This function should not fail, but always return true/false
-        // Reason: 
-        // - During module init, it doesn't matter. It can also fail.
-        // - During processCollect, it should not fail, but instead lead to normal collect.
-
         // TODO: Check if desired behaviour is fulfilled:
-        // No swap path exists: return false
-        // Swap path exists: will return numbers for checkedSourceAmount and checkedPoolAmount
-        // -> collect would succeed
-        // Liquidity low: will return values, but checkedPoolAmount will saturate to a max value
-        // -> I guess, collect would succeed, but retired carbon would be low
+        // - _poolToken is not accepted by KlimaInfinity: return false
+        // - No swap path exists: return false
+        // - _poolToken accepted and swap path exists: return true
+        // - Check on liquidity/slippage possible??
+        
         try IKlimaInfinity(KLIMA_INFINITY).getRetireAmountSourceDefault(_sourceToken, _poolToken, _amountIn) returns (uint256 amountOut) {
             emit Log("Carbon amount is": amountOut);
             if (amountOut !> 0) {
