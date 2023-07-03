@@ -300,7 +300,17 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
     }
 
 
-
+    /**
+     * @dev Performs carbon retirement
+     *
+     * @param collector The address that collects the post
+     * @param recipient The address that published the publication and receives the fee
+     * @param pubId The token ID of publication
+     * @param profileId The token ID of the profile of collector
+     * @param currency Fee currency of publication
+     * @param poolToken carbon pool token for retirement
+     * @param retirementAmount Amount of currency that goes into carbon retirement
+     */
     function _retireCarbon(
         address collector, 
         address recipient,
