@@ -381,10 +381,13 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             revert Errors.ModuleDataMismatch();
     }
     
-
-
     /**
-     * @dev Check if retirementAggregator can swap from currency to poolToken:
+     * @dev Check if retirementAggregator can swap from currency to poolToken.
+     * 
+     * TODO: This function should not fail, but always return true/false
+     * Reason: 
+     * - During module init, it doesn't matter. It can also fail.
+     * - During processCollect, it should not fail, but instead lead to normal collect.
      *
      * @param _sourceToken Address of the source token that is used to pay the retirement.
      * @param _poolToken Address of the carbon pool token that is used for retirement.
