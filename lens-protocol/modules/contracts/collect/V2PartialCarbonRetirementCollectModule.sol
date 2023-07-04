@@ -321,6 +321,13 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         uint256 retirementAmount
     ) internal {
 
+        // Messages to make retirement better connected to 
+        // collector, recipient, profileId, pubId
+        // (but that alone not fool-proof -> anyone could add such messages to a retirement)
+        // otherwise:
+        // collector --> visible as tx.origin
+        // recipient/publisher --> beneficiary
+        // profileId of collector and pubId of publication: retirement message (? could be faked, but call by module might be good filter)
         string memory retiringEntityString = string(abi.encodePacked(
             "Collecting Lens profile: ",
             Strings.toString(profileId), 
@@ -338,18 +345,10 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             Strings.toString(pubId)
         ));
 
-        // TODO: does Lens only use erc20 tokens for collects or are native currency or other allowed, too?
-        // In that case, handle those currencies accordingly
-
         // Transfer retirementAmount
         IERC20(currency).safeTransferFrom(collector, address(this), retirementAmount);
         IERC20(currency).safeTransfer(KLIMA_INFINITY, retirementAmount);
 
-        // retirement function:
-        // https://github.com/KlimaDAO/klimadao-solidity/blob/88ff87907f8319407728b1488323ce9912cdd3ed/src/infinity/facets/Retire/RetireSourceFacet.sol#L35
-        // token transfer therein:
-        // https://github.com/KlimaDAO/klimadao-solidity/blob/88ff87907f8319407728b1488323ce9912cdd3ed/src/infinity/libraries/Token/LibTransfer.sol#L42
-        
         // TODO: 
         // Retirement function requires that token is received by msg.sender,
         // which is the collect module, not the collector wallet (tx.origin).
@@ -358,14 +357,6 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         // --> Will this require an approval by address(this)??
         // --> check if fromMode INTERNAL solves it
 
-        // TODO: check if fromMode INTERNAL is correct and if value 1 represents it
-
-        // TODO:
-        // how to make collector and recipient/publisher visible in transaction??
-        // collector --> visible as tx.origin
-        // recipient/publisher --> beneficiary
-        // profileId of collector and pubId of publication: retirement message (? could be faked, but call by module might be good filter)
-        
         IKlimaInfinity(KLIMA_INFINITY).retireExactSourceDefault(
             currency,
             poolToken,
@@ -374,7 +365,7 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
             recipient, 
             beneficiaryString,
             retirementMessage,
-            1 // fromMode INTERNAL https://github.com/KlimaDAO/klimadao-solidity/blob/88ff87907f8319407728b1488323ce9912cdd3ed/src/infinity/libraries/Token/LibTransfer.sol#L17
+            1 // TODO: check if this is fromMode INTERNAL https://github.com/KlimaDAO/klimadao-solidity/blob/88ff87907f8319407728b1488323ce9912cdd3ed/src/infinity/libraries/Token/LibTransfer.sol#L17
             );
     }
 

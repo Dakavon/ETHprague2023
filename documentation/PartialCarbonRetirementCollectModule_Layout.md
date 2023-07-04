@@ -68,3 +68,4 @@
 ## Ideas for later
 - Implement specific retirement, where publisher chooses (a list of) specific carbon projects
 - Store default retirement settings of publisher in an NFT of his profile
+- Implement non-ERC20 currencies, in case Lens has those whitelisted
