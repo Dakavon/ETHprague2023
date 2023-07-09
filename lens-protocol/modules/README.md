@@ -6,6 +6,32 @@ Repository for adding Lens Protocol collect, follow and reference modules.
 
 ## Installation
 
+### Special: Foundry installation
+follow the instructions in https://www.helpmegeek.com/how-to-integrate-foundry-hardhat-project/
+
+especially regarding the lib/ folder
+
+### Special: preparing .env file for deployment
+
+#### Mnemonic, private key
+1. In a terminal, run `Anvil`
+2. Copy the given Mnemonic and one of the private keys into the related variables in .env
+
+#### RPC urls:
+1. Create a (free) account on [Alchemy](https://alchemy.com)
+2. In Alchemy, create an app using polygon and mumbai each
+3. Click on "view key" and copy the shown url into the RPC variable in .env under "Foundry"
+
+#### Block explorer:
+1. Create a (free) account on [Polygonscan](https://polygonscan.com/)
+2. Copy the given API key into the BLOCK_EXPLORER_KEY variable in .env
+
+#### testing fork:
+Start with "sandbox" (local deployment)
+
+
+### Continuing original Readme
+
 1. `npm install`
 2. If you also want to use Foundry - follow the Foundry installation instructions [here](https://getfoundry.sh/).
 
