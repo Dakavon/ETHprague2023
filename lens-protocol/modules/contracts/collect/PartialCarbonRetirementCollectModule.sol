@@ -340,7 +340,7 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         address _sourceToken,
         address _poolToken,
         uint256 _amount
-    ) external view returns (bool) {
+    ) internal returns (bool) {
 
         // TODO: This function should not fail, but always return true/false
         // Reason: 
@@ -348,9 +348,9 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         // - During processCollect, it should not fail, but instead lead to normal collect.
 
         try IKlimaRetirementAggregator(RETIREMENT_HELPER).isPoolToken(_poolToken) returns (bool result) {
-            emit Log("poolToken accepted": result);
+            //emit Log("poolToken accepted:", result);
         } catch {
-            emit Log("poolToken not accepted.");
+            //emit Log("poolToken not accepted.");
             return false;
         }
 
@@ -366,13 +366,13 @@ contract PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidation
         // Liquidity low: will return values, but checkedPoolAmount will saturate to a max value
         // -> I guess, collect would succeed, but retired carbon would be low
         try IKlimaRetirementAggregator(RETIREMENT_HELPER).getSourceAmount(_sourceToken, _poolToken, _amount, false) returns (uint256 checkedSourceAmount, uint256 checkedPoolAmount) {
-            emit Log("poolAmount is": checkedPoolAmount);
-            if (checkedPoolAmount !> 0) {
-                emit Log("poolAmount is not greater zero");
+            //emit Log("poolAmount is:", checkedPoolAmount);
+            if (!(checkedPoolAmount > 0)) {
+                //emit Log("poolAmount is not greater zero");
                 return false;
             }
         } catch {
-            emit Log("Swap path from sourceToken to poolToken not found.");
+            //emit Log("Swap path from sourceToken to poolToken not found.");
             return false;
         }
 
