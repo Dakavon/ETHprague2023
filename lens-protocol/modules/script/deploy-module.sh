@@ -49,8 +49,8 @@ if [[ $3 == "--verify-only" ]]
                     echo "Verification cancelled. Execution terminated."
                     exit 1
                 fi
-                echo "forge verify-contract $SAVED_ADDRESS $2 $BLOCK_EXPLORER_KEY --verifier-url "$VERIFIER_URL" --constructor-args "$4" --watch"
-                forge verify-contract $SAVED_ADDRESS $2 $BLOCK_EXPLORER_KEY --verifier-url "$VERIFIER_URL" --constructor-args "$4" --watch
+                echo "forge verify-contract $SAVED_ADDRESS $2 --etherscan-api-key "$BLOCK_EXPLORER_KEY" --verifier-url "$VERIFIER_URL" --constructor-args "$4" --watch"
+                forge verify-contract $SAVED_ADDRESS $2 --etherscan-api-key "$BLOCK_EXPLORER_KEY" --verifier-url "$VERIFIER_URL" --constructor-args "$4" --watch
                 exit 0
             else
                 echo "Can't find the $2 deployment address on '$1' for verification. Terminating"
@@ -99,7 +99,7 @@ if [[ $CONFIRMATION == "y" || $CONFIRMATION == "Y" ]]
         read -p "Proceed with verification? (y/n):" CONFIRMATION
         if [[ $CONFIRMATION == "y" || $CONFIRMATION == "Y" ]]
             then
-                forge verify-contract $DEPLOYED_ADDRESS $2 $BLOCK_EXPLORER_KEY --verifier-url "$VERIFIER_URL" --constructor-args "$CONSTRUCTOR_ARGS" --watch
+                forge verify-contract $DEPLOYED_ADDRESS $2 --etherscan-api-key "$BLOCK_EXPLORER_KEY" --verifier-url "$VERIFIER_URL" --constructor-args "$CONSTRUCTOR_ARGS" --watch
             else
                 "Verification cancelled. Terminating"
                 exit 1

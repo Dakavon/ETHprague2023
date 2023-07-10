@@ -22,7 +22,7 @@
     "FreeCollectModule": "0x0BE6bD7092ee83D44a6eC1D949626FeE48caB30c",
     "PoolAddressesProvider": "0x5343b5bA672Ae99d627A1C87866b8E53F47Db2E6",
     "MultirecipientFeeCollectModule": "0x99d6c3eabf05435e851c067d2c3222716f7fcfe5",
-    "StepwiseCollectModule": "0x7a7b8e7699e0492da1d3c7eab7e2f3bf1065aa40",
+    "StepwiseCollectModule": "0xcFEc402840e6a5c753D0FDa2674FD33A12A59D47",
     "ERC4626FeeCollectModule": "0x79697402bd2caa19a53d615fb1a30a98e35b84d5",
     "AaveFeeCollectModule": "0x912860ed4ed6160c48a52d52fcab5c059d34fe5a",
     "TokenGatedReferenceModule": "0xb4ba8dccd35bd3dcc5d58dbb9c7dff9c9268add9"
@@ -36,7 +36,7 @@
     "FreeCollectModule": "0x11C45Cbc6fDa2dbe435C0079a2ccF9c4c7051595",
     "PoolAddressesProvider": "0x5343b5bA672Ae99d627A1C87866b8E53F47Db2E6",
     "MultirecipientFeeCollectModule": "0x1cff6c45b0de2fff70670ef4dc67a92a1ccfe0bb",
-    "StepwiseCollectModule": "0x6928d6127dfa0da401737e6ff421fcf62d5617a3",
+    "StepwiseCollectModule": "0xb7B8d677E4e7c27fD70C8eCB6e33Ec1Ec73CD6CA",
     "ERC4626FeeCollectModule": "0x31126c602cf88193825a99dcd1d17bf1124b1b4f",
     "AaveFeeCollectModule": "0x666e06215747879ee68b3e5a317dcd8411de1897",
     "TokenGatedReferenceModule": "0x86d35562ceb9f10d7c2c23c098dfeacb02f53853"
