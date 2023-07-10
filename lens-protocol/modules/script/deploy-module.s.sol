@@ -7,6 +7,7 @@ import {StepwiseCollectModule} from 'contracts/collect/StepwiseCollectModule.sol
 import {MultirecipientFeeCollectModule} from 'contracts/collect/MultirecipientFeeCollectModule.sol';
 import {AaveFeeCollectModule} from 'contracts/collect/AaveFeeCollectModule.sol';
 import {ERC4626FeeCollectModule} from 'contracts/collect/ERC4626FeeCollectModule.sol';
+import {PartialCarbonRetirementCollectModule} from 'contracts/collect/PartialCarbonRetirementCollectModule.sol';
 import {TokenGatedReferenceModule} from 'contracts/reference/TokenGatedReferenceModule.sol';
 import {ForkManagement} from 'script/helpers/ForkManagement.sol';
 
@@ -125,6 +126,35 @@ contract DeployAaveFeeCollectModule is DeployBase {
         console.log('Constructor arguments:');
         console.logBytes(
             abi.encode(lensHubProxy, moduleGlobals, IPoolAddressesProvider(poolAddressesProvider))
+        );
+
+        return address(module);
+    }
+}
+
+contract DeployPartialCarbonRetirementCollectModule is DeployBase {
+    using stdJson for string;
+
+    address retirementHelper = 0x802fd78B14bF8d0cc0Ba0325351887a323432B70; // only mainnet/sandbox
+
+    function deploy() internal override returns (address) {
+        console.log('\nContract: PartialCarbonRetirementCollectModule');
+        console.log('Init params:');
+        console.log('\tLensHubProxy:', lensHubProxy);
+        console.log('\tModuleGlobals:', moduleGlobals);
+        console.log('\tRetirementHelper:', retirementHelper);
+
+        vm.startBroadcast(deployerPrivateKey);
+        PartialCarbonRetirementCollectModule module = new PartialCarbonRetirementCollectModule(
+            lensHubProxy,
+            moduleGlobals,
+            retirementHelper
+        );
+        vm.stopBroadcast();
+
+        console.log('Constructor arguments:');
+        console.logBytes(
+            abi.encode(lensHubProxy, moduleGlobals, retirementHelper)
         );
 
         return address(module);
