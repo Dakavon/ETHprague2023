@@ -21,11 +21,12 @@
     "ModuleGlobals": "0x1353aAdfE5FeD85382826757A95DE908bd21C4f9",
     "FreeCollectModule": "0x0BE6bD7092ee83D44a6eC1D949626FeE48caB30c",
     "PoolAddressesProvider": "0x5343b5bA672Ae99d627A1C87866b8E53F47Db2E6",
-    "MultirecipientFeeCollectModule": "0x99d6c3eabf05435e851c067d2c3222716f7fcfe5",
-    "StepwiseCollectModule": "0xcFEc402840e6a5c753D0FDa2674FD33A12A59D47",
+    "MultirecipientFeeCollectModule": "0x11a9d6779B461147BadD23dC7B87F7aac9b9c8fc",
+    "StepwiseCollectModule": "0xe690D79708d8b16894Efe0aA04b0EEA2A172D464",
     "ERC4626FeeCollectModule": "0x79697402bd2caa19a53d615fb1a30a98e35b84d5",
     "AaveFeeCollectModule": "0x912860ed4ed6160c48a52d52fcab5c059d34fe5a",
-    "TokenGatedReferenceModule": "0xb4ba8dccd35bd3dcc5d58dbb9c7dff9c9268add9"
+    "TokenGatedReferenceModule": "0xb4ba8dccd35bd3dcc5d58dbb9c7dff9c9268add9",
+    "PartialCarbonRetirementCollectModule": "0x1316f8Ae936E138B80b59f0Df1C691d1f89eD6C6"
   },
   "sandbox": {
     "chainId": 80001,
@@ -35,7 +36,7 @@
     "ModuleGlobals": "0xcbCC5b9611d22d11403373432642Df9Ef7Dd81AD",
     "FreeCollectModule": "0x11C45Cbc6fDa2dbe435C0079a2ccF9c4c7051595",
     "PoolAddressesProvider": "0x5343b5bA672Ae99d627A1C87866b8E53F47Db2E6",
-    "MultirecipientFeeCollectModule": "0x1cff6c45b0de2fff70670ef4dc67a92a1ccfe0bb",
+    "MultirecipientFeeCollectModule": "0x57A8c114f63bC93F62d1bB695b2C65521bF4e059",
     "StepwiseCollectModule": "0xb7B8d677E4e7c27fD70C8eCB6e33Ec1Ec73CD6CA",
     "ERC4626FeeCollectModule": "0x31126c602cf88193825a99dcd1d17bf1124b1b4f",
     "AaveFeeCollectModule": "0x666e06215747879ee68b3e5a317dcd8411de1897",

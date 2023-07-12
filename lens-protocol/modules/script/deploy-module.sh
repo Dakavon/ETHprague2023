@@ -79,7 +79,14 @@ if [[ $CONFIRMATION == "y" || $CONFIRMATION == "Y" ]]
     then
         echo "Deploying..."
 
-        FORGE_OUTPUT=$(forge script script/deploy-module.s.sol:Deploy$2 -s $CALLDATA --rpc-url $NETWORK --broadcast)
+        echo $CALLDATA
+        echo $2
+        echo $NETWORK
+        echo $MUMBAI_RPC_URL
+        #FORGE_OUTPUT=$(forge script script/deploy-module.s.sol:Deploy$2 -s $CALLDATA --rpc-url $NETWORK --broadcast)
+        # with gas estimate multiplier: 130 is default value according to foundry docs
+        FORGE_OUTPUT=$(forge script script/deploy-module.s.sol:Deploy$2 -s $CALLDATA --gas-estimate-multiplier 130 --rpc-url $NETWORK --broadcast)
+        #FORGE_OUTPUT=$(forge script script/deploy-module.s.sol:Deploy$2 -s $CALLDATA --rpc-url $MUMBAI_RPC_URL --broadcast)
         echo "$FORGE_OUTPUT"
 
         DEPLOYED_ADDRESS=$(echo "$FORGE_OUTPUT" | grep "Contract Address:" | sed -n 's/.*: \(0x[0-9a-hA-H]\{40\}\)/\1/p')
