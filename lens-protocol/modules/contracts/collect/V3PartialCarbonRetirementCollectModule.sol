@@ -23,7 +23,7 @@ import {CarbonRetireBase} from './base/CarbonRetireBase.sol';
 
 /**
  * @notice A struct containing the necessary data to execute collect actions on a publication.
- * @param recipientAmount The collecting cost associated with this publication. 0 for free collect.
+ * @param amount The collecting cost associated with this publication. 0 for free collect.
  * @param currency The currency associated with this publication.
  * @param referralFee The referral fee associated with this publication.
  * @param followerOnly Whether only followers should be able to collect.
@@ -32,10 +32,10 @@ import {CarbonRetireBase} from './base/CarbonRetireBase.sol';
  * @param currentCollects The current number of collects for this publication.
  * @param collectLimit The maximum number of collects for this publication (0 for unlimited)
  * @param poolToken The carbon token to be used for carbon retirement.
- * @param retirementAmount Amount that goes into carbon retirement.
+ * @param retirementSplit Fraction (BPS) of amount that goes into carbon retirement.
  */
 struct ProfilePublicationData {
-    uint160 recipientAmount;
+    uint160 amount;
     address currency;
     uint16 referralFee;
     bool followerOnly;
@@ -44,12 +44,12 @@ struct ProfilePublicationData {
     uint64 currentCollects;
     uint64 collectLimit;
     address poolToken;
-    uint160 retirementAmount;
+    uint16 retirementSplit;
 }
 
 /**
  * @notice A struct containing the necessary data to initialize Stepwise Collect Module.
- * @param recipientAmount The collecting cost associated with this publication. 0 for free collect.
+ * @param amount The collecting cost associated with this publication. 0 for free collect.
  * @param collectLimit The maximum number of collects for this publication (0 for unlimited)
  * @param currency The currency associated with this publication.
  * @param recipient The recipient address associated with this publication.
@@ -57,10 +57,10 @@ struct ProfilePublicationData {
  * @param followerOnly Whether only followers should be able to collect.
  * @param endTimestamp The end timestamp after which collecting is impossible.
  * @param poolToken The carbon token to be used for carbon retirement.
- * @param retirementAmount Amount that goes into carbon retirement.
+ * @param retirementSplit Fraction (BPS) of amount that goes into carbon retirement.
  */
 struct PartialCarbonRetirementCollectModuleInitData {
-    uint160 recipientAmount;
+    uint160 amount;
     uint64 collectLimit;
     address currency;
     address recipient;
@@ -68,7 +68,7 @@ struct PartialCarbonRetirementCollectModuleInitData {
     bool followerOnly;
     uint40 endTimestamp;
     address poolToken;
-    uint160 retirementAmount;
+    uint16 retirementSplit;
 }
 
 /**
@@ -113,8 +113,9 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
             (PartialCarbonRetirementCollectModuleInitData)
         );
         {
+            uint256 retirementAmount = (initData.retirementSplit * initData.amount) / BPS_MAX;
             if (
-                !checkRetirementSwapFeasibility(initData.currency, initData.poolToken, initData.retirementAmount) ||
+                !checkRetirementSwapFeasibility(initData.currency, initData.poolToken, retirementAmount) ||
                 !_currencyWhitelisted(initData.currency) ||
                 //initData.recipient == address(0) || // TODO: should this be included?
                 initData.referralFee > BPS_MAX ||
@@ -123,7 +124,7 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
         }
 
         _dataByPublicationByProfile[profileId][pubId] = ProfilePublicationData({
-            recipientAmount: initData.recipientAmount,
+            amount: initData.amount,
             currency: initData.currency,
             referralFee: initData.referralFee,
             followerOnly: initData.followerOnly,
@@ -132,7 +133,7 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
             currentCollects: 0,
             collectLimit: initData.collectLimit,
             poolToken: initData.poolToken,
-            retirementAmount: initData.retirementAmount
+            retirementSplit: initData.retirementSplit
         });
         return data;
     }
@@ -196,9 +197,9 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
     ) internal virtual {
 
         address currency = _dataByPublicationByProfile[profileId][pubId].currency;
-        uint160 recipientAmount = _dataByPublicationByProfile[profileId][pubId].recipientAmount;
-        uint160 retirementAmount = _dataByPublicationByProfile[profileId][pubId].retirementAmount;
-
+        uint256 retirementAmount = (_dataByPublicationByProfile[profileId][pubId].retirementSplit * _dataByPublicationByProfile[profileId][pubId].amount) / BPS_MAX;
+        uint256 recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount - retirementAmount;
+        
         _validateAllowance(collector, currency, recipientAmount + retirementAmount);
 
         // TODO: this part is not understood, with regards to calldata. Also unclear if it makes sense.
