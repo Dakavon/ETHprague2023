@@ -164,9 +164,9 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
                 ++_dataByPublicationByProfile[profileId][pubId].currentCollects;
             }
             if (referrerProfileId == profileId) {
-                _processPartialRetirementCollect(collector, profileId, pubId, data);
+                _processCollect(collector, profileId, pubId, data);
             } else {
-                _processPartialRetirementCollectWithReferral(referrerProfileId, collector, profileId, pubId, data);
+                _processCollectWithReferral(referrerProfileId, collector, profileId, pubId, data);
             }
         }
     }
@@ -182,7 +182,7 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
      * @param pubId The LensHub publication ID associated with the publication being collected.
      * @param data Arbitrary data __passed from the collector!__ to be decoded.
      */
-    function _processPartialRetirementCollect(
+    function _processCollect(
         address collector,
         uint256 profileId,
         uint256 pubId,
@@ -242,7 +242,7 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
      * @param pubId The LensHub publication ID associated with the publication being collected.
      * @param data Arbitrary data __passed from the collector!__ to be decoded.
      */
-    function _processPartialRetirementCollectWithReferral(
+    function _processCollectWithReferral(
         uint256 referrerProfileId,
         address collector,
         uint256 profileId,
