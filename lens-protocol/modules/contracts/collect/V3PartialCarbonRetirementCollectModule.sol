@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import {IERC721} from '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 
 import {ICollectModule} from '@aave/lens-protocol/contracts/interfaces/ICollectModule.sol';
 import {Errors} from '@aave/lens-protocol/contracts/libraries/Errors.sol';
@@ -248,7 +249,64 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
         uint256 pubId,
         bytes calldata data
     ) internal virtual {
-        // TODO: implement
+
+        address currency = _dataByPublicationByProfile[profileId][pubId].currency;
+        uint256 retirementAmount = (_dataByPublicationByProfile[profileId][pubId].retirementSplit * _dataByPublicationByProfile[profileId][pubId].amount) / BPS_MAX;
+        uint256 recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount - retirementAmount;
+        
+        _validateAllowance(collector, currency, recipientAmount + retirementAmount);
+
+        // TODO: Learn what this does. Guess: checks that calldata of collect equals init data of publication
+        _validateDataIsExpected(data, currency, _dataByPublicationByProfile[profileId][pubId].amount);
+
+        // Perform retirement if checkSwapFeasibility works.
+        if (checkRetirementSwapFeasibility(
+            currency, 
+            _dataByPublicationByProfile[profileId][pubId].poolToken, 
+            retirementAmount))
+            {
+                _retireCarbon(
+                    collector, 
+                    _dataByPublicationByProfile[profileId][pubId].recipient,
+                    pubId,
+                    profileId,
+                    currency,
+                    _dataByPublicationByProfile[profileId][pubId].poolToken,
+                    retirementAmount
+                    );
+            }
+        else {
+            // TODO: Up to debate. This fallback sends everything to recipient with treasury for on everything.
+            recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount;
+            // TODO: Option: add event to log carbon retirement
+        }
+
+        address treasury;
+        uint256 treasuryAmount;
+
+        // Avoids stack too deep
+        {
+            uint16 treasuryFee;
+            (treasury, treasuryFee) = _treasuryData();
+            treasuryAmount = (recipientAmount * treasuryFee) / BPS_MAX;
+        }
+
+        uint256 adjustedAmount = recipientAmount - treasuryAmount;
+        adjustedAmount = _transferToReferrals(
+            currency,
+            referrerProfileId,
+            collector,
+            profileId,
+            pubId,
+            adjustedAmount,
+            data
+        );
+
+        _transferToRecipients(currency, collector, profileId, pubId, adjustedAmount);
+
+        if (treasuryAmount > 0) {
+            IERC20(currency).safeTransferFrom(collector, treasury, treasuryAmount);
+        }
     }
 
     /**
@@ -292,6 +350,45 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
         uint256 amount
     ) internal view {
         require(IERC20(currency).allowance(collector, address(this)) >= amount, "Insufficient allowance for currency");
+    }
+
+    /**
+     * @dev Tranfers the part of fee to referral(-s)
+     *
+     * Override this to add additional functionality (e.g. multiple referrals)
+     *
+     * @param currency Currency of the transaction
+     * @param referrerProfileId The address of the referral.
+     * @param collector The address that collects the post (and pays the fee).
+     * @param profileId The token ID of the profile associated with the publication being collected.
+     * @param pubId The LensHub publication ID associated with the publication being collected.
+     * @param adjustedAmount Amount of the fee after subtracting the Treasury part.
+     * @param data Arbitrary data __passed from the collector!__ to be decoded.
+     */
+    function _transferToReferrals(
+        address currency,
+        uint256 referrerProfileId,
+        address collector,
+        uint256 profileId,
+        uint256 pubId,
+        uint256 adjustedAmount,
+        bytes calldata data
+    ) internal virtual returns (uint256) {
+        uint256 referralFee = _dataByPublicationByProfile[profileId][pubId].referralFee;
+        if (referralFee != 0) {
+            // The reason we levy the referral fee on the adjusted amount is so that referral fees
+            // don't bypass the treasury fee, in essence referrals pay their fair share to the treasury.
+            uint256 referralAmount = (adjustedAmount * referralFee) / BPS_MAX;
+            if (referralAmount > 0) {
+                adjustedAmount = adjustedAmount - referralAmount;
+
+                address referralRecipient = IERC721(HUB).ownerOf(referrerProfileId);
+
+                // Send referral fee in normal ERC20 tokens
+                IERC20(currency).safeTransferFrom(collector, referralRecipient, referralAmount);
+            }
+        }
+        return adjustedAmount;
     }
 
     /**
