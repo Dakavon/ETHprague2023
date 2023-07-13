@@ -96,17 +96,6 @@ abstract contract CarbonRetireBase {
             );
     }
 
-    // TODO: this part is not understood, with regards to calldata. Also unclear if it makes sense.
-    function _validateCarbonDataIsExpected(
-        bytes calldata data,
-        address currency,
-        uint256 amount
-    ) internal pure {
-        (address decodedCurrency, uint256 decodedAmount) = abi.decode(data, (address, uint256));
-        if (decodedAmount != amount || decodedCurrency != currency)
-            revert Errors.ModuleDataMismatch();
-    }
-
     /**
      * @dev Check if retirementAggregator can swap from currency to poolToken.
      * 

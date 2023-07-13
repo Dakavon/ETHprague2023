@@ -13,14 +13,6 @@ import {FollowValidationModuleBase} from '@aave/lens-protocol/contracts/core/mod
 
 import {CarbonRetireBase} from './base/CarbonRetireBase.sol'; 
 
-// Uses the KlimaInfinity contracts, aka RetirementAggregatorV2
-
-// TODO: check and implement switch from recipientAmount, retirementAmount to
-// amount, retirementFraction
-// reason: initial idea was to avoid the calculation of recipientAmount, retirementAmount
-// during each collect, but current implementation might be problematic with spending
-// allowance of the currency (would require allowance of sum of the amounts)
-
 /**
  * @notice A struct containing the necessary data to execute collect actions on a publication.
  * @param amount The collecting cost associated with this publication. 0 for free collect.
@@ -202,14 +194,10 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
         
         _validateAllowance(collector, currency, recipientAmount + retirementAmount);
 
-        // TODO: this part is not understood, with regards to calldata. Also unclear if it makes sense.
-        // this validation is regarding the core funtionality without the retirement
-        _validateDataIsExpected(data, currency, recipientAmount);
-        // this validation is regarding the retirement
-        _validateCarbonDataIsExpected(data, currency, retirementAmount);
+        // TODO: Learn what this does. Guess: checks that calldata of collect equals init data of publication
+        _validateDataIsExpected(data, currency, _dataByPublicationByProfile[profileId][pubId].amount);
 
-        // Perform retirement only if checkSwapFeasibility works.
-        // Otherwise skip (and perhaps send amount to publisher)
+        // Perform retirement if checkSwapFeasibility works.
         if (checkRetirementSwapFeasibility(
             currency, 
             _dataByPublicationByProfile[profileId][pubId].poolToken, 
@@ -225,6 +213,11 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
                     retirementAmount
                     );
             }
+        else {
+            // TODO: Up to debate. This fallback sends everything to recipient with treasury for on everything.
+            recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount;
+            // TODO: Option: add event to log carbon retirement
+        }
 
         (address treasury, uint16 treasuryFee) = _treasuryData();
         uint256 treasuryAmount = (recipientAmount * treasuryFee) / BPS_MAX;
