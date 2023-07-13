@@ -200,6 +200,9 @@ contract V2PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidati
 
         address currency = _dataByPublicationByProfile[profileId][pubId].currency;
         uint160 recipientAmount = _dataByPublicationByProfile[profileId][pubId].recipientAmount;
+        uint160 retirementAmount = _dataByPublicationByProfile[profileId][pubId].retirementAmount;
+
+        _validateAllowance(collector, currency, recipientAmount + retirementAmount);
 
         // TODO: this part is not understood, with regards to calldata. Also unclear if it makes sense.
         // this validation is regarding the core funtionality without the retirement
@@ -299,6 +302,25 @@ contract V2PartialCarbonRetirementCollectModule is FeeModuleBase, FollowValidati
     {
         return _dataByPublicationByProfile[profileId][pubId];
     }
+
+    /**
+     * @dev Validates that contract has allowance over full amount. 
+     * This is because the carbon retirement is inside a try/catch clause 
+     * to avoid failures stemming from liquidity issues. However, this must not fail
+     * due to insufficient allowance.
+     *
+     * @param collector Address that collects the post
+     * @param currency Address of currency for collection fee
+     * @param amount Total amount of currency used for collect
+     */
+    function _validateAllowance(
+        address collector,
+        address currency,
+        uint256 amount
+    ) internal view {
+        require(IERC20(currency).allowance(collector, address(this)) >= amount, "Insufficient allowance for currency");
+    }
+
 
     /**
      * @dev Performs carbon retirement

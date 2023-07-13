@@ -52,6 +52,7 @@
 
 ### implement fallback for retirement failure
 - ? retirement has a ERC20 transfer first -> can this be reverted?
+- fallback should not be invoked through insufficient allowance
 
 ### traceablility
 -

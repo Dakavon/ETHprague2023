@@ -26,9 +26,6 @@ especially regarding the lib/ folder
 1. Create a (free) account on [Polygonscan](https://polygonscan.com/)
 2. Copy the given API key into the BLOCK_EXPLORER_KEY variable in .env
 
-#### testing fork:
-Start with "sandbox" (local deployment)
-
 
 ### Continuing original Readme
 
