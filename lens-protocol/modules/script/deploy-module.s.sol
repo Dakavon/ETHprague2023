@@ -8,6 +8,7 @@ import {MultirecipientFeeCollectModule} from 'contracts/collect/MultirecipientFe
 import {AaveFeeCollectModule} from 'contracts/collect/AaveFeeCollectModule.sol';
 import {ERC4626FeeCollectModule} from 'contracts/collect/ERC4626FeeCollectModule.sol';
 import {PartialCarbonRetirementCollectModule} from 'contracts/collect/PartialCarbonRetirementCollectModule.sol';
+import {V3PartialCarbonRetirementCollectModule} from 'contracts/collect/V3PartialCarbonRetirementCollectModule.sol';
 import {TokenGatedReferenceModule} from 'contracts/reference/TokenGatedReferenceModule.sol';
 import {ForkManagement} from 'script/helpers/ForkManagement.sol';
 
@@ -135,7 +136,7 @@ contract DeployAaveFeeCollectModule is DeployBase {
 contract DeployPartialCarbonRetirementCollectModule is DeployBase {
     using stdJson for string;
 
-    address retirementHelper = 0x802fd78B14bF8d0cc0Ba0325351887a323432B70; // only mainnet/sandbox
+    address retirementHelper = 0x802fd78B14bF8d0cc0Ba0325351887a323432B70; // Klima RetirementAggregatorV1 mainnet
 
     function deploy() internal override returns (address) {
         console.log('\nContract: PartialCarbonRetirementCollectModule');
@@ -146,6 +147,34 @@ contract DeployPartialCarbonRetirementCollectModule is DeployBase {
 
         vm.startBroadcast(deployerPrivateKey);
         PartialCarbonRetirementCollectModule module = new PartialCarbonRetirementCollectModule(
+            lensHubProxy,
+            moduleGlobals,
+            retirementHelper
+        );
+        vm.stopBroadcast();
+
+        console.log('Constructor arguments:');
+        console.logBytes(
+            abi.encode(lensHubProxy, moduleGlobals, retirementHelper)
+        );
+
+        return address(module);
+    }
+}
+
+contract DeployV3PartialCarbonRetirementCollectModule is DeployBase {
+    using stdJson for string;
+
+    address retirementHelper = 0x8cE54d9625371fb2a068986d32C85De8E6e995f8; // Klima KlimaInfinity/RetirementAggregatorV2 mainnet
+    function deploy() internal override returns (address) {
+        console.log('\nContract: V3PartialCarbonRetirementCollectModule');
+        console.log('Init params:');
+        console.log('\tLensHubProxy:', lensHubProxy);
+        console.log('\tModuleGlobals:', moduleGlobals);
+        console.log('\tRetirementHelper:', retirementHelper);
+
+        vm.startBroadcast(deployerPrivateKey);
+        V3PartialCarbonRetirementCollectModule module = new V3PartialCarbonRetirementCollectModule(
             lensHubProxy,
             moduleGlobals,
             retirementHelper
