@@ -336,7 +336,7 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
 
     /**
      * @dev Validates that contract has allowance over full amount. 
-     * This is because the carbon retirement is inside a try/catch clause 
+     * This is because the carbon retirement is inside an if clause 
      * to avoid failures stemming from liquidity issues. However, this must not fail
      * due to insufficient allowance.
      *
@@ -353,7 +353,7 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
     }
 
     /**
-     * @dev Tranfers the part of fee to referral(-s)
+     * @dev Transfers the part of fee to referral(-s)
      *
      * Override this to add additional functionality (e.g. multiple referrals)
      *
