@@ -215,7 +215,7 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
                     );
             }
         else {
-            // TODO: Up to debate. This fallback sends everything to recipient with treasury for on everything.
+            // TODO: Up to debate. This fallback sends everything to recipient with treasury fee on everything.
             recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount;
             // TODO: Option: add event to log carbon retirement
         }
