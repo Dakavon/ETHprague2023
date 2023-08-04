@@ -19,32 +19,27 @@ Tagline: **Lens collect partial carbon retirements**
 - choose "retire carbon" as additional collection function
 - specify fraction of fee, carbon token and optionally more details
 
-![Publish](/wireframes/publish.png?raw=true)
-
+<img src="wireframes/publish.png?raw=true" width=80%>
 
 ### Collect a publication
 - see collect fee, retirement amount, carbon token and details
 - collect as usual without any additional interaction
 - user only needs to hold enough currency. Swap to carbon token is part of the collect transaction.
 
-<img src="wireframes/collect.png?raw=true" width=100%>
-
-![Collect](/wireframes/collect.png?raw=true)
+<img src="wireframes/collect.png?raw=true" width=80%>
 
 ### Profile view
 - total t carbon retired by others via own publications
 - total t carbon retired by collecting publications from others
 
-<img src="wireframes/profile.png?raw=true" width=70%>
+<img src="wireframes/profile.png?raw=true" width=50%>
 
-![Profile](/wireframes/profile.png?raw=true)
 
 ### Leadership dashboard
 - ranking of users based on either metric from profile view
 
 <img src="wireframes/ranking.png?raw=true" width=50%>
 
-![Ranking](/wireframes/ranking.png?raw=true)
 
 ### Future features
 - enable carbon retirements for sponsored publications or collects with quadratic funding etc.
