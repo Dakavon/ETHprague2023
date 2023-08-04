@@ -1,79 +1,49 @@
-# ETHprague2023
+# Overview
 
-Monorepo for ETHPrague 2023 Hackathon submission
+Repo for Lens Carbon based on ETHPrague 2023 Hackathon submission
 
-## Project Overview
+Project name: **Lens carbon**
+Tagline: **Lens collect partial carbon retirements**
 
-### Project name
-Lens carbon
+## Summary
+- A publisher of a publication can set partial carbon retirement of their collection fee. I.e. a fraction of their income is directly sent to carbon retirements with their specified details.
+- A collector of a publication collects the same way as usual. They see the fee as well as the amount for retirement and related details. Publications with carbon retirements can be made more visible to further incentivise collection.
+- The profile page of a user shows their total amount of retired carbon through collections of their publications by others as well as through their own collections.
+- A leadership dashboard shows a ranking of users based on retired carbon.
+- Where applicable, carbon amounts are clickable links that lead to a dashboard that shows the trace of each carbon retirement all the way to the carbon certificates and their details.
 
-### Tagline
-Lens collect carbon retirements
+## Features
+### Publish a publication
+- set collect fee and currency as usual
+- choose "retire carbon" as additional collection function
+- specify fraction of fee, carbon token and optionally more details
 
-### Summary
+### Collect a publication
+- see collect fee, retirement amount, carbon token and details
+- collect as usual without any additional interaction
+- user only needs to hold enough currency. Swap to carbon token is part of the collect transaction.
 
-- A user can publish a post and set collection rule to carbon offsetting. In this case, a fraction of their income is sent to carbon retirements.
-- Another user can collect such posts. The fact that a collection leads to carbon retirements does not chance their workflow, but can me made visible to further incentivise collection.
-- The profile page of a user shows their total retired carbon through collections of their posts by others as well as through their own collections.
+### Profile view
+- total t carbon retired by others via own publications
+- total t carbon retired by collecting publications from others
 
+### Leadership dashboard
+- ranking of users based on either metric from profile view
 
-## Technical Roadmap and TODOs
-
-### Features
-
-#### Profile view
-- total kg carbon retired by others in own publications
-- total kg carbon retired by collecting publications from others
-
-#### Publish a publication
-- choose "retire carbon" as collection function
-
-#### Collect a publication
-- usual workflow
-
+### Future features
+- enable carbon retirements for sponsored publications or collects with quadratic funding etc.
 
 ## Implementation
-- use BCTCollectRetire module on Mumbai https://mumbai.polygonscan.com/address/0x05A6841cBdc292f83b0642954C5497Cb02dED05A
-- use Lens SDK for everything else --> see keyword mainnet(testnet) in import statements
-- use two existing lens profiles on Mumai or create two profiles
-- build minimal app with Nader workshop template
 
-## TODOs
+### Partial carbon retirement collect module (PCRCM)
+- use KlimaDAO's retirement aggregator (RA) for maximum flexibility https://github.com/KlimaDAO/klimadao-solidity/tree/main/src/infinity
+- RA performs the token swap from collect currency to carbon token and the token retirement
+- allow any collect currency that is whitelisted by Lens and any carbon token that is included in the RA
+- at module init, check if swap path exists. If not, revert.
+- at collect process, check if swap path exists. If not:
+  - process collect without retirement (do not revert)
+  - send retirement amount to publisher, deduct treasury fee, but send an event on blockchain to signal to publisher that they should perform retirement manually to cover all such failed retirements.
+- include retirement messages to make it possible to search for all retirements by a Lens profile, publication
 
-- Deploy app on localhost
-  - works for Niels and Robert
-- Set SDK to testnet
-  - done -> in layout.tsx, try some reloads
-- 
-- Create 2 lens profiles on testnet or use two existing
-  - try using testnet API https://docs.lens.xyz/docs/deployed-contract-addresses#mumbai-testnet-addresses
-  - created with https://lens-do-it.vercel.app/
-  - on testnet.lenster.xyz created post with one account
-
-
-- Implement publish/collect functions in app
-  - Basic functionality in development
-  - Currently being debugged
-
-- Implement BCTRetireCollect function in app
-  - Test functionality using testnet.lenster.xyz and polygonscan
-  - use profiles from above
-  - on testnet.lenster, create collectable post with one account
-  - find profileId and pubId of profile and post somehow
-
-  - use this to initialize BCT module and collect
-  - 
-
-
-  - on same site, with other account, collect it
-  - allow module
-  - but now with other module
-- Implement carbon summary in profile view
-
-
-
-
-# Possible next steps
-
-- Set collection rule: choose "carbon percentage" instead of everything
-- Collection workflow: make visible that collection will retire carbon
+### Frontend
+- follow Lenster
