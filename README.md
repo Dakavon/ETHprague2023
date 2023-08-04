@@ -3,6 +3,7 @@
 Repo for Lens Carbon based on ETHPrague 2023 Hackathon submission
 
 Project name: **Lens carbon**
+
 Tagline: **Lens collect partial carbon retirements**
 
 ## Summary
@@ -39,8 +40,8 @@ Tagline: **Lens collect partial carbon retirements**
 - use KlimaDAO's retirement aggregator (RA) for maximum flexibility https://github.com/KlimaDAO/klimadao-solidity/tree/main/src/infinity
 - RA performs the token swap from collect currency to carbon token and the token retirement
 - allow any collect currency that is whitelisted by Lens and any carbon token that is included in the RA
-- at module init, check if swap path exists. If not, revert.
-- at collect process, check if swap path exists. If not:
+- at module init, check if swap path & liquidity exists. If not, revert.
+- at collect process, check if swap path & liquidity exists. If not:
   - process collect without retirement (do not revert)
   - send retirement amount to publisher, deduct treasury fee, but send an event on blockchain to signal to publisher that they should perform retirement manually to cover all such failed retirements.
 - include retirement messages to make it possible to search for all retirements by a Lens profile, publication
