@@ -187,7 +187,7 @@ contract V3PartialCarbonRetirementCollectModule is
      * @dev Internal processing of a collect:
      *  1. Calculation of fees
      *  2. Validation that fees are what collector expected
-     *  3. Transfer of fees to recipient(-s) and treasury
+     *  3. Transfer of fees to recipient and treasury
      *
      * @param collector The address that will collect the post.
      * @param profileId The token ID of the profile associated with the publication being collected.
