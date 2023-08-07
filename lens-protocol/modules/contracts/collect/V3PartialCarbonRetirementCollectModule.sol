@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-import "@openzeppelin/contracts/utils/Strings.sol";
+import '@openzeppelin/contracts/utils/Strings.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {IERC721} from '@openzeppelin/contracts/token/ERC721/IERC721.sol';
@@ -12,7 +12,7 @@ import {FeeModuleBase} from '@aave/lens-protocol/contracts/core/modules/FeeModul
 import {ModuleBase} from '@aave/lens-protocol/contracts/core/modules/ModuleBase.sol';
 import {FollowValidationModuleBase} from '@aave/lens-protocol/contracts/core/modules/FollowValidationModuleBase.sol';
 
-import {CarbonRetireBase} from './base/CarbonRetireBase.sol'; 
+import {CarbonRetireBase} from './base/CarbonRetireBase.sol';
 
 /**
  * @notice A struct containing the necessary data to execute collect actions on a publication.
@@ -71,15 +71,22 @@ struct PartialCarbonRetirementCollectModuleInitData {
  * @notice This module sends a chosen fraction of the collect fee to perform carbon retirement.
  *
  */
-contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBase, FollowValidationModuleBase, ICollectModule {
+contract V3PartialCarbonRetirementCollectModule is
+    CarbonRetireBase,
+    FeeModuleBase,
+    FollowValidationModuleBase,
+    ICollectModule
+{
     using SafeERC20 for IERC20;
 
     mapping(uint256 => mapping(uint256 => ProfilePublicationData))
         internal _dataByPublicationByProfile;
 
-    constructor(address hub, address moduleGlobals, address klimaInfinity) FeeModuleBase(moduleGlobals) ModuleBase(hub) CarbonRetireBase(klimaInfinity) {
-        
-    }
+    constructor(
+        address hub,
+        address moduleGlobals,
+        address klimaInfinity
+    ) FeeModuleBase(moduleGlobals) ModuleBase(hub) CarbonRetireBase(klimaInfinity) {}
 
     /**
      * @notice This collect module levies a fee on collects and supports referrals. Thus, we need to decode data.
@@ -91,8 +98,8 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
      *        followerOnly: True if only followers of publisher may collect the post.
      *        endTimestamp: The end timestamp after which collecting is impossible. 0 for no expiry.
      *        recipient: Recipient of collect fees.
-     *        pooltToken:
-     *        retirementAmount:
+     *        pooltToken: Carbon token for retierement
+     *        retirementSplit: Fration of amount to go to retirement
      *
      * @return An abi encoded bytes parameter, which is the same as the passed data parameter.
      */
@@ -108,11 +115,16 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
         {
             uint256 retirementAmount = (initData.retirementSplit * initData.amount) / BPS_MAX;
             if (
-                !checkRetirementSwapFeasibility(initData.currency, initData.poolToken, retirementAmount) ||
+                !checkRetirementSwapFeasibility(
+                    initData.currency,
+                    initData.poolToken,
+                    retirementAmount
+                ) ||
                 !_currencyWhitelisted(initData.currency) ||
-                //initData.recipient == address(0) || // TODO: should this be included?
+                // TODO: should this be included? Removed, because 100% retirement doesn't need recipient
+                //initData.recipient == address(0) || 
                 initData.referralFee > BPS_MAX ||
-                (initData.endTimestamp != 0 && initData.endTimestamp < block.timestamp) 
+                (initData.endTimestamp != 0 && initData.endTimestamp < block.timestamp)
             ) revert Errors.InitParamsInvalid();
         }
 
@@ -188,43 +200,39 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
         uint256 pubId,
         bytes calldata data
     ) internal virtual {
-
         address currency = _dataByPublicationByProfile[profileId][pubId].currency;
-        uint256 retirementAmount = (_dataByPublicationByProfile[profileId][pubId].retirementSplit * _dataByPublicationByProfile[profileId][pubId].amount) / BPS_MAX;
-        uint256 recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount - retirementAmount;
-        
-        _validateAllowance(collector, currency, recipientAmount + retirementAmount);
+        uint256 retirementAmount = (_dataByPublicationByProfile[profileId][pubId].retirementSplit *
+            _dataByPublicationByProfile[profileId][pubId].amount) / BPS_MAX;
 
         // TODO: Learn what this does. Guess: checks that calldata of collect equals init data of publication
-        _validateDataIsExpected(data, currency, _dataByPublicationByProfile[profileId][pubId].amount);
+        _validateDataIsExpected(
+            data,
+            currency,
+            _dataByPublicationByProfile[profileId][pubId].amount
+        );
 
-        // Perform retirement if checkSwapFeasibility works.
-        if (checkRetirementSwapFeasibility(
-            currency, 
-            _dataByPublicationByProfile[profileId][pubId].poolToken, 
-            retirementAmount))
-            {
-                _retireCarbon(
-                    collector, 
-                    _dataByPublicationByProfile[profileId][pubId].recipient,
-                    pubId,
-                    profileId,
-                    currency,
-                    _dataByPublicationByProfile[profileId][pubId].poolToken,
-                    retirementAmount
-                    );
-            }
-        else {
-            // TODO: Up to debate. This fallback sends everything to recipient with treasury fee on everything.
-            recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount;
-            // TODO: Option: add event to log carbon retirement
-        }
+        // Try retirement and return recipientAmount.
+        uint256 recipientAmount = _performCarbonRetirement(
+                collector,
+                _dataByPublicationByProfile[profileId][pubId].recipient,
+                pubId,
+                profileId,
+                currency,
+                _dataByPublicationByProfile[profileId][pubId].poolToken,
+                retirementAmount
+            );
 
         (address treasury, uint16 treasuryFee) = _treasuryData();
         uint256 treasuryAmount = (recipientAmount * treasuryFee) / BPS_MAX;
 
         // Send amount after treasury cut, to all recipients
-        _transferToRecipients(currency, collector, profileId, pubId, recipientAmount - treasuryAmount);
+        _transferToRecipients(
+            currency,
+            collector,
+            profileId,
+            pubId,
+            recipientAmount - treasuryAmount
+        );
 
         if (treasuryAmount > 0) {
             IERC20(currency).safeTransferFrom(collector, treasury, treasuryAmount);
@@ -249,37 +257,27 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
         uint256 pubId,
         bytes calldata data
     ) internal virtual {
-
         address currency = _dataByPublicationByProfile[profileId][pubId].currency;
-        uint256 retirementAmount = (_dataByPublicationByProfile[profileId][pubId].retirementSplit * _dataByPublicationByProfile[profileId][pubId].amount) / BPS_MAX;
-        uint256 recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount - retirementAmount;
-        
-        _validateAllowance(collector, currency, recipientAmount + retirementAmount);
+        uint256 retirementAmount = (_dataByPublicationByProfile[profileId][pubId].retirementSplit *
+            _dataByPublicationByProfile[profileId][pubId].amount) / BPS_MAX;
 
         // TODO: Learn what this does. Guess: checks that calldata of collect equals init data of publication
-        _validateDataIsExpected(data, currency, _dataByPublicationByProfile[profileId][pubId].amount);
+        _validateDataIsExpected(
+            data,
+            currency,
+            _dataByPublicationByProfile[profileId][pubId].amount
+        );
 
-        // Perform retirement if checkSwapFeasibility works.
-        if (checkRetirementSwapFeasibility(
-            currency, 
-            _dataByPublicationByProfile[profileId][pubId].poolToken, 
-            retirementAmount))
-            {
-                _retireCarbon(
-                    collector, 
-                    _dataByPublicationByProfile[profileId][pubId].recipient,
-                    pubId,
-                    profileId,
-                    currency,
-                    _dataByPublicationByProfile[profileId][pubId].poolToken,
-                    retirementAmount
-                    );
-            }
-        else {
-            // TODO: Up to debate. This fallback sends everything to recipient with treasury for on everything.
-            recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount;
-            // TODO: Option: add event to log carbon retirement
-        }
+        // Try retirement and return recipientAmount.
+        uint256 recipientAmount = _performCarbonRetirement(
+                collector,
+                _dataByPublicationByProfile[profileId][pubId].recipient,
+                pubId,
+                profileId,
+                currency,
+                _dataByPublicationByProfile[profileId][pubId].poolToken,
+                retirementAmount
+            );
 
         address treasury;
         uint256 treasuryAmount;
@@ -298,8 +296,7 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
             collector,
             profileId,
             pubId,
-            adjustedAmount,
-            data
+            adjustedAmount
         );
 
         _transferToRecipients(currency, collector, profileId, pubId, adjustedAmount);
@@ -310,7 +307,80 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
     }
 
     /**
-     * @dev Tranfers the fee to recipient
+     * @dev Wrapper for carbon retirement:
+     *  Creates retirement messages
+     *  Performs (attempts) retirement
+     *  Returns remaining recipient amount
+     *
+     * @param collector The address that will collect the post.
+     * @param recipient The token ID of the profile associated with the publication being collected.
+     * @param pubId The LensHub publication ID associated with the publication being collected.
+     * @param profileId Arbitrary data __passed from the collector!__ to be decoded.
+     * @param currency Currency of the collect
+     * @param poolToken Carbon pool token for retirement
+     * @param retirementAmount Amount of currency to be retired
+     */
+    function _performCarbonRetirement(
+        address collector, 
+        address recipient,
+        uint256 pubId,
+        uint256 profileId,
+        address currency,
+        address poolToken,
+        uint256 retirementAmount
+    ) internal returns (uint256 recipientAmount) {
+        // Perform retirement if checkSwapFeasibility works.
+        if (
+            checkRetirementSwapFeasibility(
+                currency,
+                poolToken,
+                retirementAmount
+            )
+        ) {
+            string memory retiringEntityString = string(
+                abi.encodePacked(
+                    'Collecting Lens profile: ',
+                    Strings.toString(profileId),
+                    ', by collector:',
+                    Strings.toHexString(collector)
+                )
+            );
+            string memory beneficiaryString = string(
+                abi.encodePacked(
+                    'Lens publication: ',
+                    Strings.toString(pubId),
+                    ', by publisher: ',
+                    Strings.toHexString(recipient)
+                )
+            );
+            string memory retirementMessage = string(
+                abi.encodePacked(
+                    'Lens Protocol carbon retirement for collect of publication: ',
+                    Strings.toString(pubId)
+                )
+            );
+            _retireCarbon(
+                collector,
+                recipient,
+                currency,
+                poolToken,
+                retirementAmount,
+                retiringEntityString,
+                beneficiaryString,
+                retirementMessage
+            );
+
+            recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount - retirementAmount;
+        } else {
+            // TODO: Up to debate. This fallback sends everything to recipient with treasury fee for everything.
+            recipientAmount = _dataByPublicationByProfile[profileId][pubId].amount;
+            // TODO: Add event or something to signal to recipient that they should perform
+            // a manual retirement of all failed retirements at a later time
+        }
+    }
+
+    /**
+     * @dev Transfers the fee to recipient
      *
      * Override this to add additional functionality (e.g. multiple recipients)
      *
@@ -335,24 +405,6 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
     }
 
     /**
-     * @dev Validates that contract has allowance over full amount. 
-     * This is because the carbon retirement is inside an if clause 
-     * to avoid failures stemming from liquidity issues. However, this must not fail
-     * due to insufficient allowance.
-     *
-     * @param collector Address that collects the post
-     * @param currency Address of currency for collection fee
-     * @param amount Total amount of currency used for collect
-     */
-    function _validateAllowance(
-        address collector,
-        address currency,
-        uint256 amount
-    ) internal view {
-        require(IERC20(currency).allowance(collector, address(this)) >= amount, "Insufficient allowance for currency");
-    }
-
-    /**
      * @dev Transfers the part of fee to referral(-s)
      *
      * Override this to add additional functionality (e.g. multiple referrals)
@@ -363,7 +415,6 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
      * @param profileId The token ID of the profile associated with the publication being collected.
      * @param pubId The LensHub publication ID associated with the publication being collected.
      * @param adjustedAmount Amount of the fee after subtracting the Treasury part.
-     * @param data Arbitrary data __passed from the collector!__ to be decoded.
      */
     function _transferToReferrals(
         address currency,
@@ -371,8 +422,7 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
         address collector,
         uint256 profileId,
         uint256 pubId,
-        uint256 adjustedAmount,
-        bytes calldata data
+        uint256 adjustedAmount
     ) internal virtual returns (uint256) {
         uint256 referralFee = _dataByPublicationByProfile[profileId][pubId].referralFee;
         if (referralFee != 0) {
@@ -400,12 +450,10 @@ contract V3PartialCarbonRetirementCollectModule is CarbonRetireBase, FeeModuleBa
      *
      * @return The ProfilePublicationData struct mapped to that publication.
      */
-    function getPublicationData(uint256 profileId, uint256 pubId)
-        external
-        view
-        virtual
-        returns (ProfilePublicationData memory)
-    {
+    function getPublicationData(
+        uint256 profileId,
+        uint256 pubId
+    ) external view virtual returns (ProfilePublicationData memory) {
         return _dataByPublicationByProfile[profileId][pubId];
     }
 

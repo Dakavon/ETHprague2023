@@ -15,7 +15,6 @@ import {IKlimaInfinity} from '../../interfaces/IKlimaInfinity.sol';
  *
  * @notice Abstract contract for carbon retirements
  * 
- * basic layout copied from https://github.com/lens-protocol/core/blob/main/contracts/core/modules/FeeModuleBase.sol
  */
 abstract contract CarbonRetireBase {
     using SafeERC20 for IERC20;
@@ -32,8 +31,6 @@ abstract contract CarbonRetireBase {
      *
      * @param collector The address that collects the post
      * @param recipient The address that published the publication and receives the fee
-     * @param pubId The token ID of publication
-     * @param profileId The token ID of the profile of collector
      * @param currency Fee currency of publication
      * @param poolToken carbon pool token for retirement
      * @param retirementAmount Amount of currency that goes into carbon retirement
@@ -41,48 +38,24 @@ abstract contract CarbonRetireBase {
     function _retireCarbon(
         address collector, 
         address recipient,
-        uint256 pubId,
-        uint256 profileId,
         address currency,
         address poolToken,
-        uint256 retirementAmount
+        uint256 retirementAmount,
+        string memory retiringEntityString,
+        string memory beneficiaryString,
+        string memory retirementMessage
     ) internal {
-
-        // Messages to make retirement better connected to 
-        // collector, recipient, profileId, pubId
-        // (but that alone not fool-proof -> anyone could add such messages to a retirement)
-        // otherwise:
-        // collector --> visible as tx.origin
-        // recipient/publisher --> beneficiary
-        // profileId of collector and pubId of publication: retirement message (? could be faked, but call by module might be good filter)
-        string memory retiringEntityString = string(abi.encodePacked(
-            "Collecting Lens profile: ",
-            Strings.toString(profileId), 
-            ", by collector:", 
-            Strings.toHexString(collector) 
-        ));
-        string memory beneficiaryString = string(abi.encodePacked(
-            "Lens publication: ",
-            Strings.toString(pubId),
-            ", by publisher: ",
-            Strings.toHexString(recipient)
-        ));
-        string memory retirementMessage = string(abi.encodePacked(
-            "Lens Protocol carbon retirement for collect of publication: ",
-            Strings.toString(pubId)
-        ));
-
         // Transfer retirementAmount
+        // 2 transfers, because retirement function requires that token is received by msg.sender,
+        // which is collect module, not collector wallet (tx.origin).
         IERC20(currency).safeTransferFrom(collector, address(this), retirementAmount);
         IERC20(currency).safeTransfer(KLIMA_INFINITY, retirementAmount);
 
-        // TODO: 
-        // Retirement function requires that token is received by msg.sender,
-        // which is the collect module, not the collector wallet (tx.origin).
+        // TODO:  
         // There's another safeTransferFrom inside retirement function, but with 0 amount
         // https://github.com/KlimaDAO/klimadao-solidity/blob/88ff87907f8319407728b1488323ce9912cdd3ed/src/infinity/libraries/Token/LibTransfer.sol#L52
         // --> Will this require an approval by address(this)??
-        // --> check if fromMode INTERNAL solves it
+        // --> Does fromMode INTERNAL solve it?
 
         IKlimaInfinity(KLIMA_INFINITY).retireExactSourceDefault(
             currency,
@@ -92,32 +65,29 @@ abstract contract CarbonRetireBase {
             recipient, 
             beneficiaryString,
             retirementMessage,
-            1 // TODO: check if this is fromMode INTERNAL https://github.com/KlimaDAO/klimadao-solidity/blob/88ff87907f8319407728b1488323ce9912cdd3ed/src/infinity/libraries/Token/LibTransfer.sol#L17
+            1 // TODO: Is 1 equal fromMode INTERNAL? https://github.com/KlimaDAO/klimadao-solidity/blob/88ff87907f8319407728b1488323ce9912cdd3ed/src/infinity/libraries/Token/LibTransfer.sol#L17
             );
     }
 
     /**
      * @dev Check if retirementAggregator can swap from currency to poolToken.
      * 
-     * TODO: This function should not fail, but always return true/false
-     * Reason: 
-     * - During module init, it doesn't matter. It can also fail.
-     * - During processCollect, it should not fail, but instead lead to normal collect.
+     * This function should not fail, but always return true/false
+     * Reason: processCollect should not fail, but instead lead to normal collect.
      *
-     * @param _sourceToken Address of the source token that is used to pay the retirement.
-     * @param _poolToken Address of the carbon pool token that is used for retirement.
-     * @param _amountIn Amount of the source token that is used for retirement.
+     * @param sourceToken Address of the source token that is used to pay the retirement.
+     * @param poolToken Address of the carbon pool token that is used for retirement.
+     * @param amountIn Amount of the source token that is used for retirement.
      *
      * @return The ProfilePublicationData struct mapped to that publication.
      */
     function checkRetirementSwapFeasibility(
-        address _sourceToken,
-        address _poolToken,
-        uint256 _amountIn
+        address sourceToken,
+        address poolToken,
+        uint256 amountIn
     ) public view returns (bool) {
 
-        if (!(_amountIn > 0)) {
-            //emit Log("Cannot retire zero tonnes");
+        if ( !(amountIn > 0) ) {
             return false;
             }
 
@@ -125,18 +95,16 @@ abstract contract CarbonRetireBase {
         // - _poolToken is not accepted by KlimaInfinity: return false
         // - No swap path exists: return false
         // - _poolToken accepted and swap path exists: return true
-        // - Check on liquidity/slippage possible??
+        // - Check on liquidity/slippage/price_impact possible???
         
-        try IKlimaInfinity(KLIMA_INFINITY).getRetireAmountSourceDefault(_sourceToken, _poolToken, _amountIn) returns (uint256 amountOut) {
-            //emit Log("Carbon amount is:", amountOut);
-            if (!(amountOut > 0)) {
-                //emit Log("Carbon amount is not greater zero");
+        try IKlimaInfinity(KLIMA_INFINITY).getRetireAmountSourceDefault(sourceToken, poolToken, amountIn) returns (uint256 amountOut) {
+            if ( !(amountOut > 0) ) {
                 return false;
             }
         } catch {
-            //emit Log("Swap path from sourceToken to poolToken not found.");
             return false;
         }
         return true;
     }
+    
 }
