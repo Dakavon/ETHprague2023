@@ -69,6 +69,14 @@ struct PartialCarbonRetirementCollectModuleInitData {
  * @author Lens Protocol
  *
  * @notice This module sends a chosen fraction of the collect fee to perform carbon retirement.
+ * The Publisher can choose the carbon pool token and the fraction of the total collect fee for the retirement.
+ * The collector only needs to hold the collect fee currency, no carbon tokens. Swap happens through the retirement aggregator during collect.
+ * 
+ * Treasury fee and referralFee are calculated only on the amount that the publisher/recipient gets, ignoring the retirement amount.
+ * 
+ * If retirement is not possible during collect, the collect process still takes place.
+ * In this case, the recipient/publisher gets the full amount and a notice in the transaction that they should perform the retirement manually at a later point.
+ * In this case, treasury fee and referralFee are calculated on the total amount that the recipient/publisher gets.
  *
  */
 contract V3PartialCarbonRetirementCollectModule is
@@ -124,6 +132,7 @@ contract V3PartialCarbonRetirementCollectModule is
                 // TODO: should this be included? Removed, because 100% retirement doesn't need recipient
                 //initData.recipient == address(0) || 
                 initData.referralFee > BPS_MAX ||
+                initData.retirementSplit > BPS_MAX ||
                 (initData.endTimestamp != 0 && initData.endTimestamp < block.timestamp)
             ) revert Errors.InitParamsInvalid();
         }
